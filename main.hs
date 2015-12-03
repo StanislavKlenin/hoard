@@ -3,17 +3,12 @@ module Main where
 
 import Control.Exception    (bracket)
 import Control.Monad        (msum)
-import Data.Acid            (AcidState, Query, Update, openLocalState)
-import Data.Acid.Advanced   (query', update')
+import Data.Acid            (AcidState, openLocalState)
 import Data.Acid.Local      (createCheckpointAndClose)
-import Data.Text            (Text, pack, empty)
-import Data.Time.Clock
+import Data.Text            (pack, empty)
 import Happstack.Server
-import Text.Read            (readMaybe)
 import Web.Routes.Happstack (implSite)
 
-import Messages
-import Render
 import Routes
 import Storage
 
@@ -26,40 +21,8 @@ routes acid =
             , notFound $ toResponse (pack "not found\n")
             ]
 
-
-runServer :: IO ()
-runServer =
+main :: IO ()
+main =
     bracket (openLocalState initialBoardState)
             (createCheckpointAndClose)
                 (\acid -> simpleHTTP nullConf (routes acid))
-
---listEm :: AcidState Board -> IO ()
---listEm acid = do
---    let b = Section "b"
---    let root = Parent 0
---    posts <- query' acid (listPosts )
-
-runConsole :: IO ()
-runConsole = do
-    currTime <- getCurrentTime
-    let message = Message { messageId = PostId 42 -- will be ignored anyway
-                          , parent    = Parent 1
-                          , section   = Section "b"
-                          , created   = currTime
-                          , author    = Author "Bill"
-                          , subject   = Subject ""
-                          , contents  = Contents "answer to post 1"
-                          }
-    let b = Section "b"
-    let root = Parent 0
-    bracket (openLocalState initialBoardState)
-            (createCheckpointAndClose)
-                (\acid -> do
-                    --u <- update' acid (AddPost message)
-                    lst <- query' acid (ListPosts b root)
-                    putStrLn $ "thread count: " ++ show (length lst))
-    putStrLn "done"
-
-main :: IO ()
-main = runServer
---main = runConsole
