@@ -12,7 +12,7 @@ import Control.Monad.State  (get, put)
 import Data.Acid            (AcidState, Update, Query,
                              makeAcidic, openLocalState)
 import Data.Data            (Data, Typeable)
-import Data.IxSet           (Indexable(..), IxSet(..), (@=), (|||),
+import Data.IxSet           (Indexable(..), IxSet(..), (@=), (|||), (&&&),
                              Proxy(..), getOne, ixFun, ixSet,
                              toAscList, toDescList)
 import qualified Data.IxSet as IxSet
@@ -92,14 +92,15 @@ threadExists (Parent t) = do
             Just Message {parent = Parent p}  -> p == 0
             Nothing -> False
 
-listThreadPosts :: Parent -> Query Board [Message]
-listThreadPosts thr@(Parent p) = do
+listThreadPosts :: Section -> Parent -> Query Board [Message]
+listThreadPosts sec thr@(Parent p) = do
     board <- ask
     let op = PostId p
     let messages = posts board
     
-    let thread = toAscList (Proxy :: Proxy UTCTime) $ (messages @= thr |||
-                                                       messages @= op)
+    let thread = toAscList (Proxy :: Proxy UTCTime) $
+            (messages @= sec &&& (messages @= thr |||
+                                  messages @= op))
     --return children
     return $ case thread of
             -- if the only item in a list has non-zero parent,

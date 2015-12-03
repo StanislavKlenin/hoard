@@ -63,15 +63,14 @@ route acid url =
             ]
         (Routes.Thread b t) -> msum
             [ do method GET
-                 messages <- query' acid (ListThreadPosts $ Parent t)
+                 messages <- query' acid (ListThreadPosts (Section b)
+                                                          (Parent t))
                  ok $ toResponse $ renderThread messages
             , post b t
-            ---, do method POST
-            ---     name     <- lookText "author"
-            ---     seeOther name (toResponse ())
-            ---     --ok $ toResponse name
-            ---     --ok $ toResponse "thread page POST\n"
+            --, do method POST
+            --     ok $ toResponse "thread page POST\n"
             ]
+    -- TODO: 404 if messages is empty (nonexistent threads and boards)
     
     where 
         post sec thread =
