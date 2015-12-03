@@ -65,12 +65,14 @@ executable hoard
   
   -- Other library packages from which modules are imported.
   build-depends:       base >=4.6 && <4.7, text,
-                       time >=1.5, mtl >=2.1 && <2.2,
-                       safecopy, ixset, acid-state,
-                       happstack-server, shakespeare,
+                       time >=1.5,
+                       safecopy, ixset >=1.0.6, acid-state >=0.13.1,
+                       happstack-server, shakespeare >=2.0.7,
                        boomerang,
-                       web-routes, web-routes-happstack,
-                       web-routes-th, web-routes-boomerang
+                       web-routes >=0.27.9, web-routes-happstack >=0.23.9,
+                       web-routes-th, web-routes-boomerang >=0.28.4,
+                       mtl
+                       -- works with --max-backjumps 16384
   
   -- Directories containing source files.
   -- hs-source-dirs:      
