@@ -54,31 +54,20 @@ addPost message = do
     board <- get
     let PostId latest = nextPostId board
     let incremented = succ latest
-    -- have to copy the message here, this is not good / need another way
-    -- we are already within monadic code, need to leverage that somehow
-    --let post = Message { messageId = PostId incremented
-    --                   , parent    = parent message
-    --                   , section   = section message
-    --                   , created   = created message
-    --                   , author    = author message
-    --                   , subject   = subject message
-    --                   , contents  = contents message
-    --                   }
-    -- actually, there is no need to repeat all fields, this suffices:
+    -- make a new post out of message, replacing an id:
+    -- (there is no need to list all fields, this suffices)
     let post = message { messageId = PostId latest }
-    -- on the other hand, the following just makes a new board
-    -- so maybe making a new message above is standard practice?
+    -- and update the whole board in the storage
     put Board { nextPostId = PostId incremented
               , posts      = IxSet.insert post (posts board)
               }
     return post
+    -- TODO: forbid adding posts to nonexistent threads
 
 postById :: PostId -> Query Board (Maybe Message)
 postById postId = do
     board <- ask
     return $ getOne $ (posts board) @= postId
-
--- TODO: list posts (with some conditions) and pagination
 
 -- list posts in a given section (board) with given parent
 -- not sure if it works
