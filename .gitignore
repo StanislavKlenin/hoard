@@ -1,0 +1,6 @@
+dist/
+state/
+.ignore/
+.cabal-sandbox/
+cabal.sandbox.config
+*.sock
