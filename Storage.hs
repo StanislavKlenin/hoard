@@ -83,15 +83,30 @@ listThreads sec = do
     board <- ask
     let root = Parent 0 -- make it a module constant? how?
     return $ toDescList (Proxy :: Proxy UTCTime) $ (posts board) @= sec @= root
+    -- TODO: order by last post time (not thread post time)
+
+threadExists :: Parent -> Query Board Bool
+threadExists (Parent t) = do
+    post  <- postById $ PostId t
+    return $ case post of
+            Just Message {parent = Parent p}  -> p == 0
+            Nothing -> False
 
 listThreadPosts :: Parent -> Query Board [Message]
-listThreadPosts thread@(Parent p) = do
+listThreadPosts thr@(Parent p) = do
     board <- ask
     let op = PostId p
     let messages = posts board
-    return $ toAscList (Proxy :: Proxy UTCTime) $ (messages @= thread |||
-                                                   messages @= op)
-    -- TODO: order by last post time (not thread post time)
+    
+    let thread = toAscList (Proxy :: Proxy UTCTime) $ (messages @= thr |||
+                                                       messages @= op)
+    --return children
+    return $ case thread of
+            -- if the only item in a list has non-zero parent,
+            -- hen it is not a thread, so return an empty list
+            [Message {parent = Parent t}] -> if t == 0 then thread else []
+            -- in any other case, return our list as is
+            _ -> thread
 
 $(makeAcidic ''Board [ 'addPost
                      , 'postById
