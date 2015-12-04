@@ -5,7 +5,7 @@ import Control.Monad     (liftM)
 import Data.Monoid       (mappend, mconcat)
 import Data.Text         (Text, pack, unpack, reverse, toUpper)
 import Data.Time
-import Data.Time.Format
+import Data.Time.Format  ()
 --import System.Locale
 import Text.Hamlet
 import Web.Routes
@@ -22,17 +22,21 @@ convRender maybeF =
 renderFunction :: MonadRoute m => m (URL m -> [(Text, Text)] -> Text)
 renderFunction = liftM convRender $ askRouteFn
 --
+type UrlRender url = url -> [(Text, Text)] -> Text
 
 -- where does that Html type come from, I wonder
 -- should be from Blaze
-renderMessage :: Message -> Html
-renderMessage message =
+renderMessage :: Message -> UrlRender url -> Html
+renderMessage message urlf =
     let PostId   postId = messageId message
         Subject  subj   = subject message
         Contents text   = contents message
         Author   name   = author message
         ts              = created message
         time            = formatTime defaultTimeLocale "%Y-%m-%d %H:%M:%S" ts
+        -- TODO: pass current timezone to this function?
+        --tz              = hoursToTimeZone 0
+        --zts             = utcToZonedTime tz ts
     in [hamlet|
 <div>
     <a name=#{postId}>
@@ -42,23 +46,27 @@ renderMessage message =
         <span>#{subj}
         <span>#{time}
     <div>#{text}
-|] undefined -- no url rendering
+|] urlf
 
-renderTwo :: Message -> Message -> Html
-renderTwo msgLeft msgRight =
-    let html1 = renderMessage msgLeft
-        html2 = renderMessage msgRight
-    in  html1 `mappend` html2
-    --in html1 <> html2
+renderMessages :: [Message] -> UrlRender url -> Html
+renderMessages messages urlf =
+    -- need to reverse arguments order, hence lambda
+    mconcat $ map (\msg -> renderMessage msg urlf) messages
 
-renderMessages :: [Message] -> Html
-renderMessages messages = mconcat $ map renderMessage messages
+-- TODO: specify type
+renderPage title inner  = [hamlet|
+$doctype 5
+<html>
+    <head>
+        <title>#{title}
+    <body>
+        ^{inner}
+|] 
 
-renderSection :: [Message] -> Html
-renderSection = renderMessages
+-- TODO: specify type
+renderSection messages urlf =
+    renderPage (pack "List of threads") (renderMessages messages) urlf
 
--- TODO: this will render the form
-renderThread :: [Message] -> Html
-renderThread = renderMessages
-
--- TODO: common page elements (head, body, ...)
+-- TODO: specify type
+renderThread messages urlf =
+    renderPage (pack "Thread") (renderMessages messages) urlf

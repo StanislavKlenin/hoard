@@ -17,6 +17,7 @@ import Data.Data            (Data, Typeable)
 import Data.Maybe           (fromMaybe)
 import Data.Text            (Text, pack, concat, empty)
 import Data.Time.Clock      (getCurrentTime)
+--import Data.Time.LocalTime  (getCurrentTimeZone)
 import Happstack.Server
 import Text.Boomerang.TH    (makeBoomerangs)
 import Web.Routes           (PathInfo(..), RouteT, showURL, runRouteT,
@@ -56,7 +57,7 @@ route acid url =
         (Routes.Board b)    -> msum
             [ do method GET
                  messages <- query' acid (ListThreads $ Section b)
-                 ok $ toResponse $ renderSection messages
+                 ok $ toResponse $ renderSection messages undefined
             , post b 0
             --, do method POST
             --     ok $ toResponse "board page POST\n"
@@ -65,7 +66,8 @@ route acid url =
             [ do method GET
                  messages <- query' acid (ListThreadPosts (Section b)
                                                           (Parent t))
-                 ok $ toResponse $ renderThread messages
+                 --tz       <- liftIO $ getCurrentTimeZone
+                 ok $ toResponse $ renderThread messages undefined
             , post b t
             --, do method POST
             --     ok $ toResponse "thread page POST\n"
