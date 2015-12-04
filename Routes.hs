@@ -57,7 +57,7 @@ route acid url =
         (Routes.Board b)    -> msum
             [ do method GET
                  messages <- query' acid (ListThreads $ Section b)
-                 ok $ toResponse $ renderSection messages undefined
+                 ok $ toResponse $ renderSection b messages undefined
             , post b 0
             --, do method POST
             --     ok $ toResponse "board page POST\n"
@@ -67,7 +67,7 @@ route acid url =
                  messages <- query' acid (ListThreadPosts (Section b)
                                                           (Parent t))
                  --tz       <- liftIO $ getCurrentTimeZone
-                 ok $ toResponse $ renderThread messages undefined
+                 ok $ toResponse $ renderThread b messages undefined
             , post b t
             --, do method POST
             --     ok $ toResponse "thread page POST\n"

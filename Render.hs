@@ -2,7 +2,7 @@
 module Render where
 
 import Control.Monad     (liftM)
-import Data.Monoid       (mappend, mconcat)
+import Data.Monoid       ((<>), mappend, mconcat)
 import Data.Text         (Text, pack, unpack, reverse, toUpper)
 import Data.Time
 import Data.Time.Format  ()
@@ -29,9 +29,9 @@ type UrlRender url = url -> [(Text, Text)] -> Text
 renderMessage :: Message -> UrlRender url -> Html
 renderMessage message urlf =
     let PostId   postId = messageId message
+        Author   name   = author message
         Subject  subj   = subject message
         Contents text   = contents message
-        Author   name   = author message
         ts              = created message
         time            = formatTime defaultTimeLocale "%Y-%m-%d %H:%M:%S" ts
         -- TODO: pass current timezone to this function?
@@ -54,19 +54,50 @@ renderMessages messages urlf =
     mconcat $ map (\msg -> renderMessage msg urlf) messages
 
 -- TODO: specify type
-renderPage title inner  = [hamlet|
+renderForm actionUrl = [hamlet|
+<form method=post action=#{actionUrl}>
+    <table>
+        <tr>
+            <td>Subject
+            <td><input type=text name=subject>
+        <tr>
+            <td>Name
+            <td><input type=text name=author>
+        <tr>
+            <td>Message
+            <td>
+                <textarea name=contents>
+        <tr>
+            <td>
+            <td><input type=submit>
+|]
+
+-- TODO: specify type
+renderPage title sec thread inner =
+    let slash = pack "/"
+        url = case thread of
+                0 -> slash <> sec
+                _ -> slash <> sec <> slash <> pack (show thread)
+        form = renderForm url
+    in [hamlet|
 $doctype 5
 <html>
     <head>
         <title>#{title}
     <body>
+        ^{form}
         ^{inner}
 |] 
 
 -- TODO: specify type
-renderSection messages urlf =
-    renderPage (pack "List of threads") (renderMessages messages) urlf
+renderSection sec messages urlf =
+    renderPage (pack "List of threads") sec 0 (renderMessages messages) urlf
 
 -- TODO: specify type
-renderThread messages urlf =
-    renderPage (pack "Thread") (renderMessages messages) urlf
+renderThread sec messages urlf = do
+    let thread = case messages of
+            [] -> 0
+            _  -> i where
+                    Message { messageId = PostId i} = head messages
+    let title = pack $ "Thread #" ++ show thread
+    renderPage title sec thread (renderMessages messages) urlf
