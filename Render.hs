@@ -29,9 +29,13 @@ type UrlRender url = url -> [(Text, Text)] -> Text
 renderMessage :: Message -> UrlRender url -> Html
 renderMessage message urlf =
     let PostId   postId = messageId message
+        Parent   owner  = parent message
+        Section  sec    = section message
         Author   name   = author message
         Subject  subj   = subject message
         Contents text   = contents message
+        slash           = pack "/"
+        pustUrl         = slash <> sec <> slash <> pack (show $ postId)
         ts              = created message
         time            = formatTime defaultTimeLocale "%Y-%m-%d %H:%M:%S" ts
         -- TODO: pass current timezone to this function?
@@ -39,9 +43,12 @@ renderMessage message urlf =
         --zts             = utcToZonedTime tz ts
     in [hamlet|
 <div>
-    <a name=#{postId}>
+    $case owner
+        $of 0
+            <a href=#{pustUrl} name=#{postId}>#{postId}</a>
+        $of _
+            <a name=#{postId}>#{postId}</a>
     <label>
-        <span>#{postId}
         <span>#{name}
         <span>#{subj}
         <span>#{time}
