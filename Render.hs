@@ -66,17 +66,17 @@ renderForm actionUrl = [hamlet|
     <table>
         <tr>
             <td>Subject
-            <td><input type=text name=subject>
+            <td><input type="text" name="subject">
         <tr>
             <td>Name
-            <td><input type=text name=author>
+            <td><input type="text" name="author">
         <tr>
             <td>Message
             <td>
-                <textarea name=contents>
+                <textarea name="contents">
         <tr>
             <td>
-            <td><input type=submit>
+            <td><input type="submit">
 |]
 
 -- TODO: specify type
