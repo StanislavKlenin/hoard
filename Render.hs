@@ -45,9 +45,9 @@ renderMessage message urlf =
 <div>
     $case owner
         $of 0
-            <a href=#{pustUrl} name=#{postId}>#{postId}</a>
+            <a href=#{pustUrl} name=#{postId}>#{postId}
         $of _
-            <a name=#{postId}>#{postId}</a>
+            <a name=#{postId}>#{postId}
     <label>
         <span>#{name}
         <span>#{subj}
@@ -61,31 +61,37 @@ renderMessages messages urlf =
     mconcat $ map (\msg -> renderMessage msg urlf) messages
 
 -- TODO: specify type
-renderForm actionUrl = [hamlet|
-<form method=post action=#{actionUrl}>
+renderForm sec thread =
+    let slash = pack "/"
+        url = case thread of
+                0 -> slash <> sec
+                _ -> slash <> sec <> slash <> pack (show thread)
+        desc = if thread == 0
+            then "new thread"
+            else "reply to thread #" ++ show thread
+    in [hamlet|
+<form method=post action=#{url}>
     <table>
         <tr>
             <td>Subject
-            <td><input type="text" name="subject">
+            <td><input type="text" name="subject"/>
         <tr>
             <td>Name
-            <td><input type="text" name="author">
+            <td><input type="text" name="author"/>
         <tr>
             <td>Message
             <td>
                 <textarea name="contents">
         <tr>
             <td>
-            <td><input type="submit">
+            <td>
+                <input type="submit"/>
+                (#{desc})
 |]
 
 -- TODO: specify type
 renderPage title sec thread inner =
-    let slash = pack "/"
-        url = case thread of
-                0 -> slash <> sec
-                _ -> slash <> sec <> slash <> pack (show thread)
-        form = renderForm url
+    let form = renderForm sec thread
     in [hamlet|
 $doctype 5
 <html>
