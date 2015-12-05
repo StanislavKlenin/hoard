@@ -9,15 +9,14 @@ module Storage where
 
 import Control.Monad.Reader (ask)
 import Control.Monad.State  (get, put)
-import Data.Acid            (AcidState, Update, Query,
-                             makeAcidic, openLocalState)
+import Data.Acid            (Update, Query, makeAcidic)
 import Data.Data            (Data, Typeable)
-import Data.IxSet           (Indexable(..), IxSet(..), (@=), (|||), (&&&),
+import Data.IxSet           (Indexable(..), IxSet, (@=), (|||), (&&&),
                              Proxy(..), getOne, ixFun, ixSet,
                              toAscList, toDescList)
 import qualified Data.IxSet as IxSet
-import Data.SafeCopy        (SafeCopy, base, deriveSafeCopy)
-import Data.Time.Clock      (UTCTime )
+import Data.SafeCopy        (base, deriveSafeCopy)
+import Data.Time.Clock      (UTCTime)
 
 import Messages
 

@@ -8,7 +8,7 @@ module Routes where
 
 import Prelude              hiding (head, id, (.))
 import Control.Applicative  (optional)
-import Control.Category     (Category(id, (.)))
+import Control.Category     (Category((.)))
 import Control.Monad        (msum)
 import Control.Monad.Trans  (MonadIO(liftIO))
 import Data.Acid            (AcidState)
@@ -21,7 +21,7 @@ import Data.Time.Clock      (getCurrentTime)
 import Happstack.Server
 import Text.Boomerang.TH    (makeBoomerangs)
 import Web.Routes           (PathInfo(..), RouteT, showURL, runRouteT,
-                             Site(..), setDefault, mkSitePI)
+                             Site(..), setDefault)
 import Web.Routes.Boomerang
 import Web.Routes.TH        (derivePathInfo)
 import Web.Routes.Happstack (implSite)

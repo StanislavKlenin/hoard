@@ -1,4 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
 module Main where
 
 import Control.Exception    (bracket)
@@ -11,8 +10,6 @@ import Web.Routes.Happstack (implSite)
 
 import Routes
 import Storage
-
-
 
 routes :: AcidState Board -> ServerPart Response
 routes acid =

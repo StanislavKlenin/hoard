@@ -2,9 +2,9 @@
 module Messages where
 
 import Data.Data            (Data, Typeable)
-import Data.SafeCopy        (SafeCopy, base, deriveSafeCopy)
+import Data.SafeCopy        (SafeCopy)
 import Data.Time.Clock      (UTCTime)
-import Data.Text            (Text, pack, unpack, reverse, toUpper)
+import Data.Text            (Text)
 
 
 newtype PostId   = PostId Int     deriving (Eq, Ord, Data, Typeable, SafeCopy)

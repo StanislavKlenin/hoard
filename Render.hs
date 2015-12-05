@@ -2,11 +2,10 @@
 module Render where
 
 import Control.Monad     (liftM)
-import Data.Monoid       ((<>), mappend, mconcat)
-import Data.Text         (Text, pack, unpack, reverse, toUpper)
+import Data.Monoid       ((<>), mconcat)
+import Data.Text         (Text, pack)
 import Data.Time
 import Data.Time.Format  ()
---import System.Locale
 import Text.Hamlet
 import Web.Routes
 
