@@ -69,7 +69,7 @@ renderForm sec thread =
                             else (Thread sec thread,
                                   "reply to thread #" ++ show thread)
     in [hamlet|
-<form method=post action=@{action}>
+<form method=post action=@{action} enctype="multipart/form-data">
     <table>
         <tr>
             <td>Subject
