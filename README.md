@@ -2,6 +2,17 @@
 
 Haskell board, work in progress
 
+## Build
+
+Cabal sandbox is recommended
+```
+cabal sandbox init
+cabal install --only-dependencies --max-backjumps 16384
+cabal run
+```
+No configuration present currently,
+hoard will use `./state` and run on `localhost:8000`
+
 ## Issues / TODO
  * Image upload and resize (for previews)
  * Removing posts
@@ -11,6 +22,7 @@ Haskell board, work in progress
  * Order thread list by recent post
  * Use current timezone
  * ~~Typesafe URLs~~
+ * REST API
 
 ## Routes
 
