@@ -6,15 +6,20 @@ import Data.Acid            (AcidState, openLocalState)
 import Data.Acid.Local      (createCheckpointAndClose)
 import Data.Text            (pack, empty)
 import Happstack.Server
+import Text.Lucius          (renderCss)
 import Web.Routes.Happstack (implSite)
 
 import Routes
+import Render               (stylesheet)
 import Storage
 
 routes :: AcidState Board -> ServerPart Response
 routes acid =
     do decodeBody (defaultBodyPolicy "/tmp/" 0 1000000 1000000)
-       msum [ implSite (pack "http://localhost:8000") empty (site acid)
+       msum [ do dirs "style.css" $ nullDir
+                 setHeaderM "Content-Type" "text/css"
+                 ok $ toResponse $ renderCss stylesheet
+            , implSite (pack "http://localhost:8000") empty (site acid)
             , notFound $ toResponse (pack "not found\n")
             ]
 

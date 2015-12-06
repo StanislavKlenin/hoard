@@ -12,12 +12,12 @@ import Control.Monad.Trans  (MonadIO(liftIO))
 import Data.Acid            (AcidState)
 import Data.Acid.Advanced   (query', update')
 import Data.Maybe           (fromMaybe)
-import Data.Text            (pack, concat, empty)
+import Data.Text            (empty)
 import Data.Time.Clock      (getCurrentTime)
 import Happstack.Server
-import Web.Routes           (RouteT, showURL, runRouteT, Site(..), setDefault)
+import Web.Routes           (RouteT, runRouteT, Site(..), setDefault)
 import Web.Routes.Boomerang
-import Web.Routes.Happstack (implSite)
+import Web.Routes.Happstack
 
 import Messages
 import Render

@@ -7,6 +7,7 @@ import Data.Text         (Text, pack)
 import Data.Time
 import Data.Time.Format  ()
 import Text.Hamlet
+import Text.Lucius
 import Web.Routes
 
 import Messages
@@ -41,17 +42,18 @@ renderMessage message =
         --tz              = hoursToTimeZone 0
         --zts             = utcToZonedTime tz ts
     in [hamlet|
-<div>
-    $case owner
-        $of 0
-            <a href=@{Thread sec postId} name=#{postId}>#{postId}
-        $of _
-            <a name=#{postId}>#{postId}
-    <label>
-        <span>#{name}
-        <span>#{subj}
-        <span>#{time}
-    <div>#{text}
+<div class="container">
+    <div class="post">
+        $case owner
+            $of 0
+                <a href=@{Thread sec postId} name=#{postId}>#{postId}
+            $of _
+                <a name=#{postId}>#{postId}
+        <label>
+            <span class="subject">#{subj}
+            <span class="author">#{name}
+            <span class="time">#{time}
+        <div class="message">#{text}
 |]
 
 renderMessages :: [Message] -> HtmlUrl Sitemap
@@ -94,7 +96,8 @@ $doctype 5
 <html>
     <head>
         <title>#{title}
-    <body>
+        <link rel="stylesheet" type="text/css" href="/style.css"/>
+    <body class="dark">
         ^{form}
         ^{inner}
 |]
@@ -111,3 +114,38 @@ renderThread sec messages = do
                     Message { messageId = PostId i} = head messages
     let title = pack $ "Thread #" ++ show thread
     renderPage title sec thread (renderMessages messages)
+
+stylesheet :: Css
+stylesheet = [lucius|
+.dark {
+    background-color: #202020;
+    color: #BBBBBB;
+    font-family: sans-serif;
+}
+.dark a:link {
+    color: #0099FF;
+}
+.dark a:visited {
+    color: #CC33FF;
+}
+.dark input[type="text"], textarea {
+    color: #EEEEEE;
+    background-color :#333333;
+    border: 1px solid #555555;
+}
+.dark > .container > .post {
+    margin: 2px;
+    padding: 4px;
+    background-color: #282828;
+    display: inline-block;
+}
+.dark > .container > .post > label > .author {
+    color: #00FF99;
+}
+.dark > .container > .post > label > .subject {
+    color: #FF4040;
+}
+.dark > .container > .post > label > .time {
+    color: #808080;
+}
+|] undefined
