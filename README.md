@@ -11,7 +11,7 @@ cabal install --only-dependencies --max-backjumps 16384
 cabal run
 ```
 No configuration present currently,
-hoard will use `./state` and run on `localhost:8000`
+hoard will use `./state/` for storage and run on `localhost:8000`
 
 ## Issues / TODO
  * Image upload and resize (for previews)
