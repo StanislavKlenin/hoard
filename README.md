@@ -4,7 +4,7 @@ Haskell board, work in progress
 
 ## Issues / TODO
  * Image upload and resize (for previews)
- * CSS
+ * ~~CSS~~
  * Display original post and several latest posts in thread view
  * Order thred list by recent post
  * Use current timezone
