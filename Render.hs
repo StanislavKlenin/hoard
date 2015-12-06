@@ -133,19 +133,19 @@ stylesheet = [lucius|
     background-color :#333333;
     border: 1px solid #555555;
 }
-.dark > .container > .post {
+.dark .post {
     margin: 2px;
     padding: 4px;
     background-color: #282828;
     display: inline-block;
 }
-.dark > .container > .post > label > .author {
+.dark .author {
     color: #00FF99;
 }
-.dark > .container > .post > label > .subject {
+.dark .subject {
     color: #FF4040;
 }
-.dark > .container > .post > label > .time {
+.dark .time {
     color: #808080;
 }
 |] undefined
