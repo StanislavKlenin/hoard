@@ -52,6 +52,7 @@ route acid url = do
     where 
         post sec thread =
              do method POST
+                urlf     <- renderFunction
                 currTime <- liftIO   $ getCurrentTime
                 name     <- optional $ lookText' "author"
                 subj     <- optional $ lookText' "subject"
@@ -61,23 +62,24 @@ route acid url = do
                     , parent    = Parent thread
                     , section   = Section sec
                     , created   = currTime
-                    , author    = Author $ extrct name
-                    , subject   = Subject $ extrct subj
-                    , contents  = Contents $ extrct text
+                    , author    = Author $ fetch name
+                    , subject   = Subject $ fetch subj
+                    , contents  = Contents $ fetch text
                     }
                 posted <- update' acid (AddPost message)
                 let tid = case thread of
-                        0 -> do     -- new thread, its id is first post id
-                            let PostId newId = messageId posted
-                            newId
-                        _ -> thread -- old thread
-                let slash = pack "/"
-                let u = Data.Text.concat [slash, sec, slash, pack $ show tid]
+                        -- new thread, its id is first post id:
+                        0 -> newId where PostId newId = messageId posted
+                        -- old thread:
+                        _ -> thread
                 -- finally, redirect to the thread
+                -- generate redirect url using url rendering function
+                -- (second argument is array of url parameters)
+                let u = urlf (Sitemap.Thread sec tid) []
                 seeOther u (toResponse ())
                 
                 where
-                    extrct = fromMaybe empty
+                    fetch = fromMaybe empty
 
 
 -- yet another wrapper
