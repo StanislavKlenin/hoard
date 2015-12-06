@@ -6,55 +6,29 @@
 
 module Routes where
 
-import Prelude              hiding (head, id, (.))
 import Control.Applicative  (optional)
-import Control.Category     (Category((.)))
 import Control.Monad        (msum)
 import Control.Monad.Trans  (MonadIO(liftIO))
 import Data.Acid            (AcidState)
 import Data.Acid.Advanced   (query', update')
-import Data.Data            (Data, Typeable)
 import Data.Maybe           (fromMaybe)
-import Data.Text            (Text, pack, concat, empty)
+import Data.Text            (pack, concat, empty)
 import Data.Time.Clock      (getCurrentTime)
---import Data.Time.LocalTime  (getCurrentTimeZone)
 import Happstack.Server
-import Text.Boomerang.TH    (makeBoomerangs)
-import Web.Routes           (PathInfo(..), RouteT, showURL, runRouteT,
-                             Site(..), setDefault)
+import Web.Routes           (RouteT, showURL, runRouteT, Site(..), setDefault)
 import Web.Routes.Boomerang
-import Web.Routes.TH        (derivePathInfo)
 import Web.Routes.Happstack (implSite)
 
 import Messages
 import Render
+import Sitemap
 import Storage
-
--- make Parent and Section instances of PathInfo, retroactively
-$(derivePathInfo ''Parent)
-$(derivePathInfo ''Section)
-
-data Sitemap = 
-    Home |
-    Board Text |
-    Thread Text Int
-    deriving (Eq, Ord, Data, Typeable)
-    
-$(derivePathInfo ''Sitemap)
-$(makeBoomerangs ''Sitemap)
-
-sitemap :: Router () (Sitemap :- ())
-sitemap = 
-    (  rHome
-    <> rBoard . anyText
-    <> rThread . (anyText </> int)
-    )
 
 route :: AcidState Board -> Sitemap -> RouteT Sitemap (ServerPartT IO) Response
 route acid url =
     case url of
-        Routes.Home         -> ok $ toResponse "home page will be here\n"
-        (Routes.Board b)    -> msum
+        Sitemap.Home         -> ok $ toResponse "home page will be here\n"
+        (Sitemap.Board b)    -> msum
             [ do method GET
                  messages <- query' acid (ListThreads $ Section b)
                  ok $ toResponse $ renderSection b messages undefined
@@ -62,7 +36,7 @@ route acid url =
             --, do method POST
             --     ok $ toResponse "board page POST\n"
             ]
-        (Routes.Thread b t) -> msum
+        (Sitemap.Thread b t) -> msum
             [ do method GET
                  messages <- query' acid (ListThreadPosts (Section b)
                                                           (Parent t))
