@@ -25,13 +25,14 @@ import Sitemap
 import Storage
 
 route :: AcidState Board -> Sitemap -> RouteT Sitemap (ServerPartT IO) Response
-route acid url =
+route acid url = do
+    urlf <- renderFunction
     case url of
         Sitemap.Home         -> ok $ toResponse "home page will be here\n"
         (Sitemap.Board b)    -> msum
             [ do method GET
                  messages <- query' acid (ListThreads $ Section b)
-                 ok $ toResponse $ renderSection b messages undefined
+                 ok $ toResponse $ renderSection b messages urlf
             , post b 0
             --, do method POST
             --     ok $ toResponse "board page POST\n"
@@ -41,7 +42,7 @@ route acid url =
                  messages <- query' acid (ListThreadPosts (Section b)
                                                           (Parent t))
                  --tz       <- liftIO $ getCurrentTimeZone
-                 ok $ toResponse $ renderThread b messages undefined
+                 ok $ toResponse $ renderThread b messages urlf
             , post b t
             --, do method POST
             --     ok $ toResponse "thread page POST\n"

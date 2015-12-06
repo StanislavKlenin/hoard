@@ -2,7 +2,7 @@
 module Render where
 
 import Control.Monad     (liftM)
-import Data.Monoid       ((<>), mconcat)
+import Data.Monoid       (mconcat)
 import Data.Text         (Text, pack)
 import Data.Time
 import Data.Time.Format  ()
@@ -10,6 +10,7 @@ import Text.Hamlet
 import Web.Routes
 
 import Messages
+import Sitemap
 
 -- rendering function for urls in templates (not used yet)
 --
@@ -25,7 +26,7 @@ type UrlRender url = url -> [(Text, Text)] -> Text
 
 -- where does that Html type come from, I wonder
 -- should be from Blaze
-renderMessage :: Message -> UrlRender url -> Html
+---renderMessage :: Message -> UrlRender url -> Html
 renderMessage message urlf =
     let PostId   postId = messageId message
         Parent   owner  = parent message
@@ -33,8 +34,6 @@ renderMessage message urlf =
         Author   name   = author message
         Subject  subj   = subject message
         Contents text   = contents message
-        slash           = pack "/"
-        pustUrl         = slash <> sec <> slash <> pack (show $ postId)
         ts              = created message
         time            = formatTime defaultTimeLocale "%Y-%m-%d %H:%M:%S" ts
         -- TODO: pass current timezone to this function?
@@ -44,7 +43,7 @@ renderMessage message urlf =
 <div>
     $case owner
         $of 0
-            <a href=#{pustUrl} name=#{postId}>#{postId}
+            <a href=@{Thread sec postId} name=#{postId}>#{postId}
         $of _
             <a name=#{postId}>#{postId}
     <label>
@@ -54,22 +53,20 @@ renderMessage message urlf =
     <div>#{text}
 |] urlf
 
-renderMessages :: [Message] -> UrlRender url -> Html
+---renderMessages :: [Message] -> UrlRender url -> Html
 renderMessages messages urlf =
     -- need to reverse arguments order, hence lambda
     mconcat $ map (\msg -> renderMessage msg urlf) messages
 
 -- TODO: specify type
-renderForm sec thread =
-    let slash = pack "/"
-        url = case thread of
-                0 -> slash <> sec
-                _ -> slash <> sec <> slash <> pack (show thread)
-        desc = if thread == 0
-            then "new thread"
-            else "reply to thread #" ++ show thread
+renderForm sec thread urlf =
+    let (action, desc) = if thread == 0
+                            then (Board sec,
+                                  "new thread")
+                            else (Thread sec thread,
+                                  "reply to thread #" ++ show thread)
     in [hamlet|
-<form method=post action=#{url}>
+<form method=post action=@{action}>
     <table>
         <tr>
             <td>Subject
@@ -86,10 +83,10 @@ renderForm sec thread =
             <td>
                 <input type="submit"/>
                 (#{desc})
-|]
+|] urlf
 
 -- TODO: specify type
-renderPage title sec thread inner =
+renderPage title sec thread inner urlf =
     let form = renderForm sec thread
     in [hamlet|
 $doctype 5
@@ -99,7 +96,7 @@ $doctype 5
     <body>
         ^{form}
         ^{inner}
-|] 
+|] urlf
 
 -- TODO: specify type
 renderSection sec messages urlf =
