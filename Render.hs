@@ -12,7 +12,7 @@ import Web.Routes
 import Messages
 import Sitemap
 
--- rendering function for urls in templates (not used yet)
+-- rendering function for urls in templates
 --
 convRender :: (url -> [(Text, Maybe Text)] -> Text)
            -> (url -> [(Text, Text)]-> Text)
@@ -22,12 +22,13 @@ convRender maybeF =
 renderFunction :: MonadRoute m => m (URL m -> [(Text, Text)] -> Text)
 renderFunction = liftM convRender $ askRouteFn
 --
-type UrlRender url = url -> [(Text, Text)] -> Text
+--type UrlRender url = url -> [(Text, Text)] -> Text
 
--- where does that Html type come from, I wonder
--- should be from Blaze
----renderMessage :: Message -> UrlRender url -> Html
-renderMessage message urlf =
+-- note: all of the functions below return HtmlUrl Sitemap
+-- which expects url rendering function to be supplied
+-- client code (in Routes.hs) uses renderFunction defined above
+renderMessage :: Message -> HtmlUrl Sitemap
+renderMessage message =
     let PostId   postId = messageId message
         Parent   owner  = parent message
         Section  sec    = section message
@@ -51,15 +52,15 @@ renderMessage message urlf =
         <span>#{subj}
         <span>#{time}
     <div>#{text}
-|] urlf
+|]
 
----renderMessages :: [Message] -> UrlRender url -> Html
-renderMessages messages urlf =
+renderMessages :: [Message] -> HtmlUrl Sitemap
+renderMessages messages =
     -- need to reverse arguments order, hence lambda
-    mconcat $ map (\msg -> renderMessage msg urlf) messages
+    mconcat $ map (\msg -> renderMessage msg) messages
 
--- TODO: specify type
-renderForm sec thread urlf =
+renderForm :: Text -> Int -> HtmlUrl Sitemap
+renderForm sec thread =
     let (action, desc) = if thread == 0
                             then (Board sec,
                                   "new thread")
@@ -83,10 +84,10 @@ renderForm sec thread urlf =
             <td>
                 <input type="submit"/>
                 (#{desc})
-|] urlf
+|]
 
--- TODO: specify type
-renderPage title sec thread inner urlf =
+renderPage :: Text -> Text -> Int -> HtmlUrl Sitemap -> HtmlUrl Sitemap
+renderPage title sec thread inner =
     let form = renderForm sec thread
     in [hamlet|
 $doctype 5
@@ -96,17 +97,17 @@ $doctype 5
     <body>
         ^{form}
         ^{inner}
-|] urlf
+|]
 
--- TODO: specify type
-renderSection sec messages urlf =
-    renderPage (pack "List of threads") sec 0 (renderMessages messages) urlf
+renderSection :: Text -> [Message] -> HtmlUrl Sitemap
+renderSection sec messages =
+    renderPage (pack "List of threads") sec 0 (renderMessages messages)
 
--- TODO: specify type
-renderThread sec messages urlf = do
+renderThread :: Text -> [Message] -> HtmlUrl Sitemap
+renderThread sec messages = do
     let thread = case messages of
             [] -> 0
             _  -> i where
                     Message { messageId = PostId i} = head messages
     let title = pack $ "Thread #" ++ show thread
-    renderPage title sec thread (renderMessages messages) urlf
+    renderPage title sec thread (renderMessages messages)
