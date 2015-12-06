@@ -88,7 +88,7 @@ threadExists :: Parent -> Query Board Bool
 threadExists (Parent t) = do
     post  <- postById $ PostId t
     return $ case post of
-            Just Message {parent = Parent p}  -> p == 0
+            Just Message {parent = Parent p} -> p == 0
             Nothing -> False
 
 listThreadPosts :: Section -> Parent -> Query Board [Message]
@@ -96,14 +96,12 @@ listThreadPosts sec thr@(Parent p) = do
     board <- ask
     let op = PostId p
     let messages = posts board
-    
     let thread = toAscList (Proxy :: Proxy UTCTime) $
             (messages @= sec &&& (messages @= thr |||
                                   messages @= op))
-    --return children
     return $ case thread of
             -- if the only item in a list has non-zero parent,
-            -- hen it is not a thread, so return an empty list
+            -- then it is not a thread, so return an empty list
             [Message {parent = Parent t}] -> if t == 0 then thread else []
             -- in any other case, return our list as is
             _ -> thread
