@@ -84,6 +84,25 @@ listThreads sec = do
     return $ toDescList (Proxy :: Proxy UTCTime) $ (posts board) @= sec @= root
     -- TODO: order by last post time (not thread post time)
 
+listThreads' :: Section -> [Message] -> Query Board [[Message]]
+listThreads' sec firstPosts = do
+    board <- ask
+    let messages = posts board
+        --root = Parent 0
+        --firstPosts =
+        --    toDescList (Proxy :: Proxy UTCTime) $ messages @= sec @= root
+        threads =
+            map (\msg ->
+                       let PostId op = messageId msg
+                           thr = Parent op
+                           thread = toDescList (Proxy :: Proxy UTCTime) $
+                                               (messages @= thr @= sec)
+                           latest = reverse $ take 2 thread
+                       in msg : latest)
+                firstPosts
+    return threads
+
+
 threadExists :: Parent -> Query Board Bool
 threadExists (Parent t) = do
     post  <- postById $ PostId t
@@ -111,4 +130,5 @@ $(makeAcidic ''Board [ 'addPost
                      , 'listPosts
                      , 'listThreads
                      , 'listThreadPosts
+                     , 'listThreads'
                      ])
