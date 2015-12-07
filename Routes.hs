@@ -33,7 +33,9 @@ route acid url = do
             [ do method GET
                  --messages <- query' acid (ListThreads $ Section b)
                  --ok $ toResponse $ renderSection b messages urlf
-                 preview <- query' acid (ListThreads' $ Section b)
+                 -- listing 5 most recent posts for each thread
+                 -- (hardcoded for now)
+                 preview <- query' acid (ListThreadPreviews (Section b) 5)
                  ok $ toResponse $ renderSection' b preview urlf
             , post b 0
             --, do method POST

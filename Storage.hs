@@ -77,6 +77,7 @@ listPosts sec starter = do
          toDescList (Proxy :: Proxy UTCTime) $
              (posts board) @= sec @= starter
 
+-- list of first posts (OPs)
 listThreads :: Section -> Query Board [Message]
 listThreads sec = do
     board <- ask
@@ -84,8 +85,10 @@ listThreads sec = do
     return $ toDescList (Proxy :: Proxy UTCTime) $ (posts board) @= sec @= root
     -- TODO: order by last post time (not thread post time)
 
-listThreads' :: Section -> Query Board [[Message]]
-listThreads' sec = do
+-- list of "thread previews",
+-- where each preview is he first post and several latest ones
+listThreadPreviews :: Section -> Int -> Query Board [[Message]]
+listThreadPreviews sec count = do
     board <- ask
     let messages = posts board
         root = Parent 0
@@ -97,7 +100,7 @@ listThreads' sec = do
                            thr = Parent op
                            thread = toDescList (Proxy :: Proxy UTCTime) $
                                                (messages @= thr @= sec)
-                           latest = reverse $ take 2 thread
+                           latest = reverse $ take count thread
                        in msg : latest)
                 firstPosts
     return threads
@@ -130,5 +133,5 @@ $(makeAcidic ''Board [ 'addPost
                      , 'listPosts
                      , 'listThreads
                      , 'listThreadPosts
-                     , 'listThreads'
+                     , 'listThreadPreviews
                      ])
