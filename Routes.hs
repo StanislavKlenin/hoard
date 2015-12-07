@@ -36,7 +36,7 @@ route acid url = do
                  -- listing 5 most recent posts for each thread
                  -- (hardcoded for now)
                  preview <- query' acid (ListThreadPreviews (Section b) 5)
-                 ok $ toResponse $ renderSection' b preview urlf
+                 ok $ toResponse $ renderSection b preview urlf
             , post b 0
             --, do method POST
             --     ok $ toResponse "board page POST\n"

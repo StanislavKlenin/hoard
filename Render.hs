@@ -102,12 +102,12 @@ $doctype 5
         ^{inner}
 |]
 
-renderSection :: Text -> [Message] -> HtmlUrl Sitemap
-renderSection sec messages =
+renderSectionLite :: Text -> [Message] -> HtmlUrl Sitemap
+renderSectionLite sec messages =
     renderPage (pack "List of threads") sec 0 (renderMessages messages)
 
-renderSection' :: Text -> [[Message]] -> HtmlUrl Sitemap
-renderSection' sec threads =
+renderSection :: Text -> [[Message]] -> HtmlUrl Sitemap
+renderSection sec threads =
     let sep = [hamlet|<hr>|]
         lst = intersperse sep $ map renderMessages threads
     in renderPage (pack "List of threads") sec 0 $ mconcat lst
