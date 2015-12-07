@@ -31,8 +31,10 @@ route acid url = do
         Sitemap.Home         -> ok $ toResponse "home page will be here\n"
         (Sitemap.Board b)    -> msum
             [ do method GET
-                 messages <- query' acid (ListThreads $ Section b)
-                 ok $ toResponse $ renderSection b messages urlf
+                 --messages <- query' acid (ListThreads $ Section b)
+                 --ok $ toResponse $ renderSection b messages urlf
+                 preview <- query' acid (ListThreads' $ Section b)
+                 ok $ toResponse $ renderSection' b preview urlf
             , post b 0
             --, do method POST
             --     ok $ toResponse "board page POST\n"

@@ -84,13 +84,13 @@ listThreads sec = do
     return $ toDescList (Proxy :: Proxy UTCTime) $ (posts board) @= sec @= root
     -- TODO: order by last post time (not thread post time)
 
-listThreads' :: Section -> [Message] -> Query Board [[Message]]
-listThreads' sec firstPosts = do
+listThreads' :: Section -> Query Board [[Message]]
+listThreads' sec = do
     board <- ask
     let messages = posts board
-        --root = Parent 0
-        --firstPosts =
-        --    toDescList (Proxy :: Proxy UTCTime) $ messages @= sec @= root
+        root = Parent 0
+        firstPosts =
+            toDescList (Proxy :: Proxy UTCTime) $ messages @= sec @= root
         threads =
             map (\msg ->
                        let PostId op = messageId msg
