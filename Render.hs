@@ -58,8 +58,7 @@ renderMessage message =
 
 renderMessages :: [Message] -> HtmlUrl Sitemap
 renderMessages messages =
-    -- need to reverse arguments order, hence lambda
-    mconcat $ map (\msg -> renderMessage msg) messages
+    mconcat $ map renderMessage messages
 
 renderForm :: Text -> Int -> HtmlUrl Sitemap
 renderForm sec thread =
@@ -107,13 +106,13 @@ renderSection sec messages =
     renderPage (pack "List of threads") sec 0 (renderMessages messages)
 
 renderThread :: Text -> [Message] -> HtmlUrl Sitemap
-renderThread sec messages = do
+renderThread sec messages =
     let thread = case messages of
             [] -> 0
             _  -> i where
                     Message { messageId = PostId i} = head messages
-    let title = pack $ "Thread #" ++ show thread
-    renderPage title sec thread (renderMessages messages)
+        title = pack $ "Thread #" ++ show thread
+    in renderPage title sec thread (renderMessages messages)
 
 stylesheet :: Css
 stylesheet = [lucius|
