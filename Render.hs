@@ -2,6 +2,7 @@
 module Render where
 
 import Control.Monad     (liftM)
+import Data.List         (intersperse)
 import Data.Monoid       (mconcat)
 import Data.Text         (Text, pack)
 import Data.Time
@@ -104,6 +105,12 @@ $doctype 5
 renderSection :: Text -> [Message] -> HtmlUrl Sitemap
 renderSection sec messages =
     renderPage (pack "List of threads") sec 0 (renderMessages messages)
+
+renderSection' :: Text -> [[Message]] -> HtmlUrl Sitemap
+renderSection' sec threads =
+    let sep = [hamlet|<hr>|]
+        lst = intersperse sep $ map renderMessages threads
+    in renderPage (pack "List of threads") sec 0 $ mconcat lst
 
 renderThread :: Text -> [Message] -> HtmlUrl Sitemap
 renderThread sec messages =
