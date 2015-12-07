@@ -17,7 +17,7 @@ hoard will use `./state/` for storage and run on `localhost:8000`
  * Image upload and resize (for previews)
  * Removing posts
  * ~~CSS~~
- * Display original post and several latest posts in thread view
+ * ~~Display original post and several latest posts in thread view~~
  * Pagination
  * Order thread list by recent post
  * Use current timezone
