@@ -99,7 +99,9 @@ $doctype 5
         <link rel="stylesheet" type="text/css" href="/style.css"/>
     <body class="dark">
         ^{form}
+        <hr .separator>
         ^{inner}
+        <hr .separator>
 |]
 
 renderSectionLite :: Text -> [Message] -> HtmlUrl Sitemap
@@ -108,7 +110,7 @@ renderSectionLite sec messages =
 
 renderSection :: Text -> [[Message]] -> HtmlUrl Sitemap
 renderSection sec threads =
-    let sep = [hamlet|<hr>|]
+    let sep = [hamlet|<hr .separator>|]
         lst = intersperse sep $ map renderMessages threads
     in renderPage (pack "List of threads") sec 0 $ mconcat lst
 
@@ -153,5 +155,11 @@ stylesheet = [lucius|
 }
 .dark .time {
     color: #808080;
+}
+.dark .separator {
+    border: 0;
+    height: 1px;
+    color: #404040;
+    background-color: #404040;
 }
 |] undefined
