@@ -86,7 +86,7 @@ listThreads sec = do
     -- TODO: order by last post time (not thread post time)
 
 -- list of "thread previews",
--- where each preview is he first post and several latest ones
+-- where each preview is the first post and several latest ones
 listThreadPreviews :: Section -> Int -> Query Board [[Message]]
 listThreadPreviews sec count = do
     board <- ask
