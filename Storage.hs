@@ -13,8 +13,9 @@ import Data.Acid            (Update, Query, makeAcidic)
 import Data.Data            (Data, Typeable)
 import Data.IxSet           (Indexable(..), IxSet, (@=), (|||), (&&&),
                              Proxy(..), getOne, ixFun, ixSet,
-                             toAscList, toDescList)
+                             toAscList, toDescList, toList)
 import qualified Data.IxSet as IxSet
+import Data.List            (sortBy)
 import Data.SafeCopy        (base, deriveSafeCopy)
 import Data.Time.Clock      (UTCTime)
 
@@ -92,8 +93,7 @@ listThreadPreviews sec count = do
     board <- ask
     let messages = posts board
         root = Parent 0
-        firstPosts =
-            toDescList (Proxy :: Proxy UTCTime) $ messages @= sec @= root
+        firstPosts = toList $ messages @= sec @= root
         threads =
             map (\msg ->
                        let PostId op = messageId msg
@@ -103,7 +103,14 @@ listThreadPreviews sec count = do
                            latest = reverse $ take count thread
                        in msg : latest)
                 firstPosts
-    return threads
+    return $ sortBy cmpf threads
+    where
+        -- non-empty list assumed;
+        -- can'd be empty by design, at least original post is always present
+        cmpf left right =
+            let l = last left
+                r = last right
+            in (created r) `compare` (created l)
 
 
 threadExists :: Parent -> Query Board Bool

@@ -19,7 +19,7 @@ hoard will use `./state/` for storage and run on `localhost:8000`
  * ~~CSS~~
  * ~~Display original post and several latest posts in thread view~~
  * Pagination
- * Order thread list by recent post
+ * ~~Order thread list by recent post~~
  * Use current timezone
  * ~~Typesafe URLs~~
  * REST API
