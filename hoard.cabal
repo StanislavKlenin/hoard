@@ -10,7 +10,7 @@ name:                hoard
 -- PVP summary:      +-+------- breaking API changes
 --                   | | +----- non-breaking API additions
 --                   | | | +--- code changes with no API change
-version:             0.4.1.0
+version:             0.4.2.0
 
 -- A short (one-line) description of the package.
 synopsis:            (Eventually, image-) board in Haskell (Happstack/Hamlet)
@@ -71,7 +71,7 @@ executable hoard
                        boomerang,
                        web-routes >=0.27.9, web-routes-happstack >=0.23.9,
                        web-routes-th, web-routes-boomerang >=0.28.4,
-                       mtl
+                       mtl, configurator
                        -- works with --max-backjumps 16384
   
   -- Directories containing source files.
