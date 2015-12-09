@@ -48,6 +48,6 @@ main = do
         
         appRoot h p =
             case p of
-                80  -> "http://" ++ h ++ "/"
-                443 -> "https://" ++ h ++ "/"
-                _   -> "http://" ++ h ++ ":" ++ (show p) ++ "/"
+                80  -> "http://"  ++ h
+                443 -> "https://" ++ h
+                _   -> "http://"  ++ h ++ ":" ++ (show p)
