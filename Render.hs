@@ -4,7 +4,7 @@ module Render where
 import Control.Monad     (liftM)
 import Data.List         (intersperse)
 import Data.Monoid       (mconcat)
-import Data.Text         (Text, pack)
+import Data.Text         (Text, empty, pack)
 import Data.Time
 import Data.Time.Format  ()
 import Text.Hamlet
@@ -37,11 +37,20 @@ renderMessage message =
         Author   name   = author message
         Subject  subj   = subject message
         Contents text   = contents message
+        imgName         = imageName message
+        imgExt          = imageExt message
         ts              = created message
         time            = formatTime defaultTimeLocale "%Y-%m-%d %H:%M:%S" ts
         -- TODO: pass current timezone to this function?
         --tz              = hoursToTimeZone 0
         --zts             = utcToZonedTime tz ts
+        img             = if imgName /= empty
+                              then mconcat [imgName, pack ".", imgExt]
+                              else empty
+        imgurl          =
+            if img /= empty
+                then [hamlet|<span><a href=/#{sec}/src/#{img}>#{img}</a>|]
+                else [hamlet||]
     in [hamlet|
 <div class="container">
     <div class="post">
@@ -54,7 +63,9 @@ renderMessage message =
             <span class="subject">#{subj}
             <span class="author">#{name}
             <span class="time">#{time}
-        <div class="message">#{text}
+        <div class="message">
+            ^{imgurl}
+            <blockquote>#{text}
 |]
 
 renderMessages :: [Message] -> HtmlUrl Sitemap
@@ -164,5 +175,8 @@ stylesheet = [lucius|
     height: 1px;
     color: #404040;
     background-color: #404040;
+}
+.message > blockquote {
+    margin: 4px;
 }
 |] undefined
