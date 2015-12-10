@@ -68,9 +68,14 @@ route acid dir url = do
                 name     <- optional $ lookText' "author"
                 subj     <- optional $ lookText' "subject"
                 text     <- optional $ lookText' "contents"
-                upload   <- optional $ lookFile  "image"
+                upload'  <- optional $ lookFile "image"
+                let upload = case upload' of
+                                Just (_, "", _) -> Nothing
+                                _               -> upload'
                 if not $ acceptableFile upload
-                    then badRequest $ toResponse "file type not supported"
+                then do
+                    liftIO $ putStrLn ("not acceptable " ++ show upload)
+                    badRequest $ toResponse "file type not supported"
                 else do
                     liftIO $ rename upload currTime (unpack dir) (unpack sec)
                     let message = Messages.Message {
