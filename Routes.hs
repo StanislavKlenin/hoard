@@ -12,12 +12,12 @@ import Control.Monad.Trans  (MonadIO(liftIO))
 import Data.Acid            (AcidState)
 import Data.Acid.Advanced   (query', update')
 import Data.Maybe           (fromMaybe)
-import Data.Text            (empty)
+import Data.Text            (Text, empty, unpack)
 import Data.Time            (defaultTimeLocale)
 import Data.Time.Clock      (getCurrentTime)
 import Data.Time.Format     (formatTime)
 import Happstack.Server
-import System.Directory     (renameFile)
+import System.Directory     (renameFile, createDirectoryIfMissing)
 import System.FilePath      (joinPath)
 import Web.Routes           (RouteT, runRouteT, Site(..), setDefault)
 import Web.Routes.Boomerang
@@ -28,8 +28,11 @@ import Render
 import Sitemap
 import Storage
 
-route :: AcidState Board -> Sitemap -> RouteT Sitemap (ServerPartT IO) Response
-route acid url = do
+route :: AcidState Board ->
+         Text ->
+         Sitemap ->
+         RouteT Sitemap (ServerPartT IO) Response
+route acid dir url = do
     urlf <- renderFunction
     case url of
         Sitemap.Home         -> ok $ toResponse "home page will be here\n"
@@ -69,8 +72,7 @@ route acid url = do
                 if not $ acceptableFile upload
                     then badRequest $ toResponse "file type not supported"
                 else do
-                    liftIO $ rename upload currTime
-                    liftIO $ putStrLn "after"
+                    liftIO $ rename upload currTime (unpack dir) (unpack sec)
                     let message = Messages.Message {
                           messageId = PostId 0 -- ignored
                         , parent    = Parent thread
@@ -95,11 +97,13 @@ route acid url = do
                 where
                     fetch = fromMaybe empty
                     
-                    rename Nothing _ = return ()
-                    rename (Just (tmpPath, _, ctype)) t = do
+                    rename Nothing _ _ _ = return ()
+                    rename (Just (tmpPath, _, ctype)) t dir sec = do
                         let ts = formatTime defaultTimeLocale "%s%q" t
                             newName = (ts ++ "." ++ (ctSubtype ctype))
-                            newPath = joinPath [".", newName]
+                            newDir  = joinPath [dir, sec, "src"]
+                            newPath = joinPath [newDir, newName]
+                        createDirectoryIfMissing True newDir
                         renameFile tmpPath newPath
                     
                     acceptableFile Nothing = True
@@ -110,7 +114,7 @@ route acid url = do
 
 
 -- yet another wrapper
-site :: AcidState Board -> Site Sitemap (ServerPartT IO Response)
-site acid =
+site :: AcidState Board -> Text -> Site Sitemap (ServerPartT IO Response)
+site acid dir =
     --setDefault Home $ mkSitePI (runRouteT $ route acid)
-    setDefault Home $ boomerangSite (runRouteT $ route acid) sitemap
+    setDefault Home $ boomerangSite (runRouteT $ route acid dir) sitemap

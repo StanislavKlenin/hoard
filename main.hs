@@ -15,13 +15,13 @@ import Routes
 import Render               (stylesheet)
 import Storage
 
-routes :: AcidState Board -> BodyPolicy -> Text -> ServerPart Response
-routes acid decodePolicy homeUrl = do
+routes :: AcidState Board -> BodyPolicy -> Text -> Text-> ServerPart Response
+routes acid decodePolicy homeUrl static = do
     decodeBody decodePolicy
     msum [ do dirs "style.css" $ nullDir
               setHeaderM "Content-Type" "text/css"
               ok $ toResponse $ renderCss stylesheet
-         , implSite homeUrl empty (site acid)
+         , implSite homeUrl empty (site acid static)
          , notFound $ toResponse (pack "not found\n")
          ]
 
@@ -30,6 +30,7 @@ main = do
     args   <- getArgs
     config <- load [ Optional (head' args) ]
     tmpdir <- lookupDefault "/tmp"        config (pack "tmp")
+    static <- lookupDefault "/tmp"        config (pack "static")
     h      <- lookupDefault "localhost"   config (pack "host")
     p      <- lookupDefault (8000 :: Int) config (pack "port")
     
@@ -37,10 +38,11 @@ main = do
     let policy = defaultBodyPolicy tmpdir 1000000 1000000 1000000
         home   = pack $ appRoot h p
         conf   = nullConf { port = p }
+        st     = pack static
     
     bracket (openLocalState initialBoardState)
             (createCheckpointAndClose)
-                (\acid -> simpleHTTP conf (routes acid policy home))
+                (\acid -> simpleHTTP conf (routes acid policy home st))
     where
         head' :: [String] -> String
         head' [] = ""
