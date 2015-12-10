@@ -26,6 +26,9 @@ data Message = Message { messageId :: PostId
                        , author    :: Author
                        , subject   :: Subject
                        , contents  :: Contents
+                       , imageName :: Text
+                       , imageExt  :: Text
+                       , origFile  :: Text
                        } deriving (Eq, Ord, Data, Typeable)
 
 

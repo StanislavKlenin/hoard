@@ -12,7 +12,7 @@ import Control.Monad.Trans  (MonadIO(liftIO))
 import Data.Acid            (AcidState)
 import Data.Acid.Advanced   (query', update')
 import Data.Maybe           (fromMaybe)
-import Data.Text            (Text, empty, unpack)
+import Data.Text            (Text, empty, pack, unpack)
 import Data.Time            (defaultTimeLocale)
 import Data.Time.Clock      (getCurrentTime)
 import Data.Time.Format     (formatTime)
@@ -81,6 +81,9 @@ route acid dir url = do
                         , author    = Author $ fetch name
                         , subject   = Subject $ fetch subj
                         , contents  = Contents $ fetch text
+                        , origFile  = pack $ origName upload
+                        , imageName = pack $ imgName upload currTime
+                        , imageExt  = pack $ imgExt upload
                         }
                     posted <- update' acid (AddPost message)
                     let tid = case thread of
@@ -97,10 +100,19 @@ route acid dir url = do
                 where
                     fetch = fromMaybe empty
                     
+                    origName Nothing = ""
+                    origName (Just (_, s, _)) = s
+                    
+                    imgName Nothing _ = ""
+                    imgName (Just (_, _, _)) t =
+                        formatTime defaultTimeLocale "%s%q" t
+                    
+                    imgExt Nothing = ""
+                    imgExt (Just (_, _, ctype)) = ctSubtype ctype
+                    
                     rename Nothing _ _ _ = return ()
-                    rename (Just (tmpPath, _, ctype)) t static s = do
-                        let ts = formatTime defaultTimeLocale "%s%q" t
-                            newName = (ts ++ "." ++ (ctSubtype ctype))
+                    rename f@(Just (tmpPath, _, _)) t static s = do
+                        let newName = (imgName f t) ++ "." ++ (imgExt f)
                             newDir  = joinPath [static, s, "src"]
                             newPath = joinPath [newDir, newName]
                         createDirectoryIfMissing True newDir
