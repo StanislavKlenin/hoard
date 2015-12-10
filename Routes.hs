@@ -98,10 +98,10 @@ route acid dir url = do
                     fetch = fromMaybe empty
                     
                     rename Nothing _ _ _ = return ()
-                    rename (Just (tmpPath, _, ctype)) t dir sec = do
+                    rename (Just (tmpPath, _, ctype)) t static s = do
                         let ts = formatTime defaultTimeLocale "%s%q" t
                             newName = (ts ++ "." ++ (ctSubtype ctype))
-                            newDir  = joinPath [dir, sec, "src"]
+                            newDir  = joinPath [static, s, "src"]
                             newPath = joinPath [newDir, newName]
                         createDirectoryIfMissing True newDir
                         renameFile tmpPath newPath
