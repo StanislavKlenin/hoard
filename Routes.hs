@@ -115,6 +115,6 @@ route acid dir url = do
 
 -- yet another wrapper
 site :: AcidState Board -> Text -> Site Sitemap (ServerPartT IO Response)
-site acid dir =
+site acid static =
     --setDefault Home $ mkSitePI (runRouteT $ route acid)
-    setDefault Home $ boomerangSite (runRouteT $ route acid dir) sitemap
+    setDefault Home $ boomerangSite (runRouteT $ route acid static) sitemap
