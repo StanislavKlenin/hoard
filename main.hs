@@ -29,12 +29,12 @@ main :: IO ()
 main = do
     args   <- getArgs
     config <- load [ Optional (head' args) ]
-    tmpdir <- lookupDefault "/tmp" config (pack "tmp")
-    h      <- lookupDefault "localhost" config (pack "host")
+    tmpdir <- lookupDefault "/tmp"        config (pack "tmp")
+    h      <- lookupDefault "localhost"   config (pack "host")
     p      <- lookupDefault (8000 :: Int) config (pack "port")
     
     -- TODO: other policy parameters must be configurable too
-    let policy = defaultBodyPolicy tmpdir 0 1000000 1000000
+    let policy = defaultBodyPolicy tmpdir 1000000 1000000 1000000
         home   = pack $ appRoot h p
         conf   = nullConf { port = p }
     
