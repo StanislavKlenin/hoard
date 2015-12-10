@@ -82,6 +82,9 @@ renderForm sec thread =
             <td>
                 <textarea name="contents">
         <tr>
+            <td>Image
+            <td><input type="file" name="image"/>
+        <tr>
             <td>
             <td>
                 <input type="submit"/>
@@ -136,7 +139,7 @@ stylesheet = [lucius|
 .dark a:visited {
     color: #CC33FF;
 }
-.dark input[type="text"], textarea {
+.dark input[type="text"], input[type="file"], textarea {
     color: #EEEEEE;
     background-color :#333333;
     border: 1px solid #555555;

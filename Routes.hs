@@ -13,8 +13,12 @@ import Data.Acid            (AcidState)
 import Data.Acid.Advanced   (query', update')
 import Data.Maybe           (fromMaybe)
 import Data.Text            (empty)
+import Data.Time            (defaultTimeLocale)
 import Data.Time.Clock      (getCurrentTime)
+import Data.Time.Format     (formatTime)
 import Happstack.Server
+import System.Directory     (renameFile)
+import System.FilePath      (joinPath)
 import Web.Routes           (RouteT, runRouteT, Site(..), setDefault)
 import Web.Routes.Boomerang
 import Web.Routes.Happstack
@@ -61,29 +65,48 @@ route acid url = do
                 name     <- optional $ lookText' "author"
                 subj     <- optional $ lookText' "subject"
                 text     <- optional $ lookText' "contents"
-                let message = Messages.Message {
-                      messageId = PostId 0 -- ignored
-                    , parent    = Parent thread
-                    , section   = Section sec
-                    , created   = currTime
-                    , author    = Author $ fetch name
-                    , subject   = Subject $ fetch subj
-                    , contents  = Contents $ fetch text
-                    }
-                posted <- update' acid (AddPost message)
-                let tid = case thread of
-                        -- new thread, its id is first post id:
-                        0 -> newId where PostId newId = messageId posted
-                        -- old thread:
-                        _ -> thread
-                -- finally, redirect to the thread
-                -- generate redirect url using url rendering function
-                -- (second argument is array of url parameters)
-                let u = urlf (Sitemap.Thread sec tid) []
-                seeOther u (toResponse ())
+                upload   <- optional $ lookFile  "image"
+                if not $ acceptableFile upload
+                    then badRequest $ toResponse "file type not supported"
+                else do
+                    liftIO $ rename upload currTime
+                    liftIO $ putStrLn "after"
+                    let message = Messages.Message {
+                          messageId = PostId 0 -- ignored
+                        , parent    = Parent thread
+                        , section   = Section sec
+                        , created   = currTime
+                        , author    = Author $ fetch name
+                        , subject   = Subject $ fetch subj
+                        , contents  = Contents $ fetch text
+                        }
+                    posted <- update' acid (AddPost message)
+                    let tid = case thread of
+                            -- new thread, its id is first post id:
+                            0 -> newId where PostId newId = messageId posted
+                            -- old thread:
+                            _ -> thread
+                    -- finally, redirect to the thread
+                    -- generate redirect url using url rendering function
+                    -- (second argument is array of url parameters)
+                    let u = urlf (Sitemap.Thread sec tid) []
+                    seeOther u (toResponse ())
                 
                 where
                     fetch = fromMaybe empty
+                    
+                    rename Nothing _ = return ()
+                    rename (Just (tmpPath, _, ctype)) t = do
+                        let ts = formatTime defaultTimeLocale "%s%q" t
+                            newName = (ts ++ "." ++ (ctSubtype ctype))
+                            newPath = joinPath [".", newName]
+                        renameFile tmpPath newPath
+                    
+                    acceptableFile Nothing = True
+                    acceptableFile (Just (_, _, ctype)) =
+                        s == "png" || s == "jpeg" || s == "gif"
+                        where
+                            s = ctSubtype ctype
 
 
 -- yet another wrapper
