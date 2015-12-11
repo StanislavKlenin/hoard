@@ -193,6 +193,6 @@ stylesheet = [lucius|
 }
 .dark .preview {
     float: left;
-    margin-right: 4px;
+    margin-right: 16px;
 }
 |] undefined
