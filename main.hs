@@ -2,7 +2,7 @@ module Main where
 
 import Control.Exception    (bracket)
 import Control.Monad        (msum)
-import Data.Acid            (AcidState, openLocalState)
+import Data.Acid            (AcidState, openLocalStateFrom)
 import Data.Acid.Local      (createCheckpointAndClose)
 import Data.Configurator    (Worth(..), load, lookupDefault)
 import Data.Text            (Text, empty, pack, unpack)
@@ -34,6 +34,7 @@ main = do
     static <- lookupDefault "/tmp"        config (pack "static")
     h      <- lookupDefault "localhost"   config (pack "host")
     p      <- lookupDefault (8000 :: Int) config (pack "port")
+    state  <- lookupDefault "/tmp"        config (pack "storage")
     
     -- TODO: other policy parameters must be configurable too
     let policy = defaultBodyPolicy tmpdir 1000000 1000000 1000000
@@ -41,7 +42,8 @@ main = do
         conf   = nullConf { port = p }
         st     = pack static
     
-    bracket (openLocalState initialBoardState)
+    putStrLn state
+    bracket (openLocalStateFrom state initialBoardState)
             (createCheckpointAndClose)
                 (\acid -> simpleHTTP conf (routes acid policy home st))
     where
