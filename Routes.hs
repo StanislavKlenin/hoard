@@ -126,7 +126,7 @@ route acid static url = do
                             newPath  = joinPath [newDir, baseName]
                         createDirectoryIfMissing True newDir
                         renameFile tmpPath newPath
-                        resize newDir name ext 300
+                        resize newDir name ext 200
                     
                     resize :: FilePath -> FilePath -> String -> Int -> IO ()
                     resize d name ext width = do
