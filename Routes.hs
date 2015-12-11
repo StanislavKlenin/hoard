@@ -16,6 +16,8 @@ import Data.Text            (Text, empty, pack, unpack)
 import Data.Time            (defaultTimeLocale)
 import Data.Time.Clock      (getCurrentTime)
 import Data.Time.Format     (formatTime)
+import Graphics.GD          (loadGifFile, loadJpegFile, loadPngFile,
+                             saveJpegFile, imageSize, resizeImage)
 import Happstack.Server
 import System.Directory     (renameFile, createDirectoryIfMissing)
 import System.FilePath      (joinPath)
@@ -32,7 +34,7 @@ route :: AcidState Board ->
          Text ->
          Sitemap ->
          RouteT Sitemap (ServerPartT IO) Response
-route acid dir url = do
+route acid static url = do
     urlf <- renderFunction
     case url of
         Sitemap.Home         -> ok $ toResponse "home page will be here\n"
@@ -77,7 +79,7 @@ route acid dir url = do
                     liftIO $ putStrLn ("not acceptable " ++ show upload)
                     badRequest $ toResponse "file type not supported"
                 else do
-                    liftIO $ rename upload currTime (unpack dir) (unpack sec)
+                    liftIO $ rename upload currTime (unpack static) (unpack sec)
                     let message = Messages.Message {
                           messageId = PostId 0 -- ignored
                         , parent    = Parent thread
@@ -116,12 +118,32 @@ route acid dir url = do
                     imgExt (Just (_, _, ctype)) = ctSubtype ctype
                     
                     rename Nothing _ _ _ = return ()
-                    rename f@(Just (tmpPath, _, _)) t static s = do
-                        let newName = (imgName f t) ++ "." ++ (imgExt f)
-                            newDir  = joinPath [static, s, "src"]
-                            newPath = joinPath [newDir, newName]
+                    rename f@(Just (tmpPath, _, _)) t docroot s = do
+                        let name     = (imgName f t)
+                            ext      = (imgExt f)
+                            baseName = name ++ "." ++ ext
+                            newDir   = joinPath [docroot, s, "src"]
+                            newPath  = joinPath [newDir, baseName]
                         createDirectoryIfMissing True newDir
                         renameFile tmpPath newPath
+                        resize newDir name ext 300
+                    
+                    resize :: FilePath -> FilePath -> String -> Int -> IO ()
+                    resize d name ext width = do
+                        let full  = joinPath [d, name ++ "."  ++ ext]
+                            small = joinPath [d, name ++ "s." ++ "jpeg"]
+                        img <- case ext of
+                                "jpeg" -> loadJpegFile full
+                                "png"  -> loadPngFile  full
+                                "gif"  -> loadGifFile  full
+                        (origWidth, origHeight) <- imageSize img
+                        let ratio = if origWidth <= width
+                                        then 1.0 :: Double
+                                        else fromIntegral origWidth /
+                                             fromIntegral width
+                            height = round (fromIntegral origHeight / ratio)
+                        img' <- resizeImage width height img
+                        saveJpegFile (-1) small img'
                     
                     acceptableFile Nothing = True
                     acceptableFile (Just (_, _, ctype)) =
