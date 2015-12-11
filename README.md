@@ -4,7 +4,7 @@ Haskell board, work in progress
 
 ## Build
 
-[libdg](http://libgd.github.io/) required.
+[libgd](http://libgd.github.io/) required.
 
 Cabal sandbox is recommended
 ```
