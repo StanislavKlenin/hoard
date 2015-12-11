@@ -44,13 +44,7 @@ renderMessage message =
         -- TODO: pass current timezone to this function?
         --tz              = hoursToTimeZone 0
         --zts             = utcToZonedTime tz ts
-        img             = if imgName /= empty
-                              then mconcat [imgName, pack ".", imgExt]
-                              else empty
-        imgurl          =
-            if img /= empty
-                then [hamlet|<span><a href=/#{sec}/src/#{img}>#{img}</a>|]
-                else [hamlet||]
+        img = image sec imgName imgExt
     in [hamlet|
 <div class="container">
     <div class="post">
@@ -64,10 +58,28 @@ renderMessage message =
             <span class="author">#{name}
             <span class="time">#{time}
         <div class="message">
-            ^{imgurl}
+            ^{img}
             <blockquote>#{text}
 |]
+    where
+        image sec name ext =
+            let largeName = if name /= empty
+                            then mconcat [name, pack ".", ext]
+                            else empty
+                smallName = if name /= empty
+                            then mconcat [name, pack "s.jpeg"]
+                            else empty
+                in if name == empty
+                    then [hamlet||]
+                    else [hamlet|
+                    
+<span>
+    <a href=/#{sec}/src/#{largeName}>#{largeName}</a>
+    <br>
+    <a href=/#{sec}/src/#{largeName}>
+        <img src=/#{sec}/src/#{smallName} class="preview">
 
+|]
 renderMessages :: [Message] -> HtmlUrl Sitemap
 renderMessages messages =
     mconcat $ map renderMessage messages
@@ -176,7 +188,11 @@ stylesheet = [lucius|
     color: #404040;
     background-color: #404040;
 }
-.message > blockquote {
+.dark .message > blockquote {
     margin: 4px;
+}
+.dark .preview {
+    float: left;
+    margin-right: 4px;
 }
 |] undefined
