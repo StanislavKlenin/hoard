@@ -30,6 +30,7 @@ data Message = Message { messageId :: PostId
                        , imageName :: Text
                        , imageExt  :: Text
                        , origFile  :: Text
+                       , password  :: Text
                        , status    :: Status
                        } deriving (Eq, Ord, Data, Typeable)
 

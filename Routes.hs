@@ -70,6 +70,7 @@ route acid static url = do
                 name     <- optional $ lookText' "author"
                 subj     <- optional $ lookText' "subject"
                 text     <- optional $ lookText' "contents"
+                pass     <- optional $ lookText' "password"
                 upload'  <- optional $ lookFile "image"
                 let upload = case upload' of
                                 Just (_, "", _) -> Nothing
@@ -91,6 +92,7 @@ route acid static url = do
                         , origFile  = pack $ origName upload
                         , imageName = pack $ imgName upload currTime
                         , imageExt  = pack $ imgExt upload
+                        , password  = fetch $ pass
                         , status    = Present
                         }
                     posted <- update' acid (AddPost message)

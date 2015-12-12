@@ -18,6 +18,7 @@ import qualified Data.IxSet as IxSet
 import Data.List            (sortBy)
 import Data.SafeCopy        (base, deriveSafeCopy)
 import Data.Time.Clock      (UTCTime)
+import Data.Text            (Text)
 
 import Messages
 
@@ -66,20 +67,23 @@ addPost message = do
     return post
     -- TODO: forbid adding posts to nonexistent threads
 
-markDeleted :: PostId -> Update Board Bool
-markDeleted (PostId postId) = do
+markDeleted :: PostId -> Text -> Update Board Bool
+markDeleted (PostId postId) pass = do
     board <- get
     let post = getOne $ (posts board) @= postId
-    upd board post
+    upd board post pass
     where
-        upd board (Just message) = do
-            let updated = message { status = Removed }
-                filtered = IxSet.delete message (posts board)
-            put Board { nextPostId = nextPostId board -- unchanged
-                      , posts      = IxSet.insert updated filtered
-                      }
-            return True
-        upd _ Nothing = do
+        upd board (Just message) pw = -- do
+            if (password message) /= pw
+                then return False
+                else do
+                    let updated = message { status = Removed }
+                        filtered = IxSet.delete message (posts board)
+                    put Board { nextPostId = nextPostId board -- unchanged
+                              , posts      = IxSet.insert updated filtered
+                              }
+                    return True
+        upd _ _ _ = do
             return False
 
 postById :: PostId -> Query Board (Maybe Message)
