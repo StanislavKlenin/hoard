@@ -23,7 +23,7 @@ or
 ```
 /path/to/hoard hoard.conf
 ```
-hoard.conf is a `name = value` text config fith following fields:
+hoard.conf is a `name = value` text config with following fields:
  * `host`: hostname (used to generate urls, mostly);
     default: `localhost`
  * `port`: port to listen at;
