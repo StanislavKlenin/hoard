@@ -131,7 +131,7 @@ route acid static url = do
                         if removed
                             then do
                                 urlf <- renderFunction
-                                let u = if n == thread
+                                let u = if (n == thread) || thread == 0
                                     then urlf (Sitemap.Board sec) []
                                     else urlf (Sitemap.Thread sec thread) []
                                 seeOther u (toResponse ())
