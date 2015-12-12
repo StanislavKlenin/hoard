@@ -37,7 +37,7 @@ hoard.conf is a `name = value` text config fith following fields:
 
 ## Issues / TODO
  * ~~Image upload and resize (for previews)~~
- * Removing posts
+ * ~~Removing posts~~
  * ~~CSS~~
  * ~~Display original post and several latest posts in thread view~~
  * Pagination
