@@ -36,6 +36,7 @@ hoard.conf is a `name = value` text config fith following fields:
     default: `/tmp`
 
 ## Issues / TODO
+ * Home/root url
  * ~~Image upload and resize (for previews)~~
  * ~~Removing posts~~
  * ~~CSS~~
