@@ -42,7 +42,6 @@ main = do
         conf   = nullConf { port = p }
         st     = pack static
     
-    putStrLn state
     bracket (openLocalStateFrom state initialBoardState)
             (createCheckpointAndClose)
                 (\acid -> simpleHTTP conf (routes acid policy home st))
