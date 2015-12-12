@@ -144,7 +144,11 @@ route acid static url = do
                     
                     imgName Nothing _ = ""
                     imgName (Just (_, _, _)) t =
-                        formatTime defaultTimeLocale "%s%q" t
+                        -- %q returns picoseconds, 12 characters
+                        -- so s will be long enough
+                        let s = formatTime defaultTimeLocale "%s%q" t
+                            l = length s
+                        in take (l - 6) s
                     
                     imgExt Nothing = ""
                     imgExt (Just (_, _, ctype)) = ctSubtype ctype
