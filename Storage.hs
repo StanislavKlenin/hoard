@@ -68,7 +68,7 @@ addPost message = do
     -- TODO: forbid adding posts to nonexistent threads
 
 markDeleted :: PostId -> Text -> Update Board Bool
-markDeleted (PostId postId) pass = do
+markDeleted postId pass = do
     board <- get
     let post = getOne $ (posts board) @= postId
     upd board post pass
