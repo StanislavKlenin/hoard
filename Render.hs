@@ -48,12 +48,13 @@ renderMessage message =
     in [hamlet|
 <div class="container">
     <div class="post">
-        $case owner
-            $of 0
-                <a href=@{Thread sec postId} name=#{postId}>#{postId}
-            $of _
-                <a name=#{postId}>#{postId}
         <label>
+            <input type="checkbox" name="delete" value="#{postId}"/>
+            $case owner
+                $of 0
+                    <a href=@{Thread sec postId} name=#{postId}>#{postId}
+                $of _
+                    <a name=#{postId}>#{postId}
             <span class="subject">#{subj}
             <span class="author">#{name}
             <span class="time">#{time}
@@ -108,6 +109,9 @@ renderForm sec thread =
             <td>Image
             <td><input type="file" name="image"/>
         <tr>
+            <td>Password
+            <td><input type="password" name="password"/>
+        <tr>
             <td>
             <td>
                 <input type="submit"/>
@@ -126,8 +130,13 @@ $doctype 5
     <body class="dark">
         ^{form}
         <hr .separator>
-        ^{inner}
-        <hr .separator>
+        <form method=post action=@{Thread sec thread}>
+            ^{inner}
+            <hr .separator>
+            <div class="del">
+                Password
+                <input type="password" name="password" size="8"/>
+                <input value="Delete" type="submit"/>
 |]
 
 renderSectionLite :: Text -> [Message] -> HtmlUrl Sitemap
@@ -162,7 +171,7 @@ stylesheet = [lucius|
 .dark a:visited {
     color: #CC33FF;
 }
-.dark input[type="text"], input[type="file"], textarea {
+.dark input[type="text"], input[type="file"], input[type="password"], textarea {
     color: #EEEEEE;
     background-color :#333333;
     border: 1px solid #555555;
@@ -194,5 +203,10 @@ stylesheet = [lucius|
 .dark .preview {
     float: left;
     margin-right: 16px;
+}
+.dark .del {
+    float: right;
+    //margin-left: auto;
+    //margin-right: 0;
 }
 |] undefined
