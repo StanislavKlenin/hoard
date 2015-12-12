@@ -65,6 +65,25 @@ route acid static url = do
     where 
         post sec thread =
              do method POST
+                del <- optional $ lookText' "delete"
+                if fetch del /= empty
+                    then do
+                        let delId = case reads (unpack (fetch del)) of
+                                    [(x, "")] -> x
+                                    _ -> 0
+                        if delId /= 0
+                            then remove (PostId delId)
+                            else croak "invalid id\n"
+                    else do
+                        upload'  <- optional $ lookFile "image"
+                        let upload = case upload' of
+                                Just (_, "", _) -> Nothing
+                                _               -> upload'
+                        if not $ acceptableFile upload
+                            then croak "file type not supported\n"
+                            else do
+                                store upload
+                {-
                 urlf     <- renderFunction
                 currTime <- liftIO   $ getCurrentTime
                 name     <- optional $ lookText' "author"
@@ -77,8 +96,8 @@ route acid static url = do
                                 _               -> upload'
                 if not $ acceptableFile upload
                 then do
-                    liftIO $ putStrLn ("not acceptable " ++ show upload)
-                    badRequest $ toResponse "file type not supported"
+                    -- badRequest $ toResponse "file type not supported"
+                    croak
                 else do
                     liftIO $ rename upload currTime (unpack static) (unpack sec)
                     let message = Messages.Message {
@@ -106,8 +125,62 @@ route acid static url = do
                     -- (second argument is array of url parameters)
                     let u = urlf (Sitemap.Thread sec tid) []
                     seeOther u (toResponse ())
-                
+                -}
                 where
+                    croak :: String -> RouteT Sitemap (ServerPartT IO) Response
+                    croak what = do
+                        badRequest $ toResponse what
+                    
+                    store :: Maybe (FilePath, FilePath, ContentType) ->
+                             RouteT Sitemap (ServerPartT IO) Response
+                    store ul = do
+                        urlf     <- renderFunction
+                        currTime <- liftIO   $ getCurrentTime
+                        name     <- optional $ lookText' "author"
+                        subj     <- optional $ lookText' "subject"
+                        text     <- optional $ lookText' "contents"
+                        pass     <- optional $ lookText' "password"
+                        liftIO $ rename ul currTime (unpack static) (unpack sec)
+                        let message = Messages.Message {
+                              messageId = PostId 0 -- ignored
+                            , parent    = Parent thread
+                            , section   = Section sec
+                            , created   = currTime
+                            , author    = Author $ fetch name
+                            , subject   = Subject $ fetch subj
+                            , contents  = Contents $ fetch text
+                            , origFile  = pack $ origName ul
+                            , imageName = pack $ imgName ul currTime
+                            , imageExt  = pack $ imgExt ul
+                            , password  = fetch $ pass
+                            , status    = Present
+                            }
+                        posted <- update' acid (AddPost message)
+                        let tid = case thread of
+                                -- new thread, its id is first post id:
+                                0 -> newId where PostId newId = messageId posted
+                                -- old thread:
+                                _ -> thread
+                        -- generate redirect url using url rendering function
+                        -- (second argument is array of url parameters)
+                        let u = urlf (Sitemap.Thread sec tid) []
+                        -- finally, redirect to the thread
+                        seeOther u (toResponse ())
+                    
+                    
+                    remove :: PostId -> RouteT Sitemap (ServerPartT IO) Response
+                    remove p = do
+                        pass <- optional $ lookText' "password"
+                        removed <- update' acid (MarkDeleted p (fetch pass))
+                        if removed
+                            then do
+                                urlf <- renderFunction
+                                let u = urlf (Sitemap.Thread sec 0) []
+                                seeOther u (toResponse ())
+                            else croak "could not delete\n"
+                    
+                    
+                    
                     fetch = fromMaybe empty
                     
                     origName Nothing = ""
