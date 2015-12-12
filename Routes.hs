@@ -83,49 +83,6 @@ route acid static url = do
                             then croak "file type not supported\n"
                             else do
                                 store upload
-                {-
-                urlf     <- renderFunction
-                currTime <- liftIO   $ getCurrentTime
-                name     <- optional $ lookText' "author"
-                subj     <- optional $ lookText' "subject"
-                text     <- optional $ lookText' "contents"
-                pass     <- optional $ lookText' "password"
-                upload'  <- optional $ lookFile "image"
-                let upload = case upload' of
-                                Just (_, "", _) -> Nothing
-                                _               -> upload'
-                if not $ acceptableFile upload
-                then do
-                    -- badRequest $ toResponse "file type not supported"
-                    croak
-                else do
-                    liftIO $ rename upload currTime (unpack static) (unpack sec)
-                    let message = Messages.Message {
-                          messageId = PostId 0 -- ignored
-                        , parent    = Parent thread
-                        , section   = Section sec
-                        , created   = currTime
-                        , author    = Author $ fetch name
-                        , subject   = Subject $ fetch subj
-                        , contents  = Contents $ fetch text
-                        , origFile  = pack $ origName upload
-                        , imageName = pack $ imgName upload currTime
-                        , imageExt  = pack $ imgExt upload
-                        , password  = fetch $ pass
-                        , status    = Present
-                        }
-                    posted <- update' acid (AddPost message)
-                    let tid = case thread of
-                            -- new thread, its id is first post id:
-                            0 -> newId where PostId newId = messageId posted
-                            -- old thread:
-                            _ -> thread
-                    -- finally, redirect to the thread
-                    -- generate redirect url using url rendering function
-                    -- (second argument is array of url parameters)
-                    let u = urlf (Sitemap.Thread sec tid) []
-                    seeOther u (toResponse ())
-                -}
                 where
                     croak :: String -> RouteT Sitemap (ServerPartT IO) Response
                     croak what = do
@@ -167,19 +124,18 @@ route acid static url = do
                         -- finally, redirect to the thread
                         seeOther u (toResponse ())
                     
-                    
                     remove :: PostId -> RouteT Sitemap (ServerPartT IO) Response
-                    remove p = do
+                    remove p@(PostId n) = do
                         pass <- optional $ lookText' "password"
                         removed <- update' acid (MarkDeleted p (fetch pass))
                         if removed
                             then do
                                 urlf <- renderFunction
-                                let u = urlf (Sitemap.Thread sec 0) []
+                                let u = if n == thread
+                                    then urlf (Sitemap.Board sec) []
+                                    else urlf (Sitemap.Thread sec thread) []
                                 seeOther u (toResponse ())
                             else croak "could not delete\n"
-                    
-                    
                     
                     fetch = fromMaybe empty
                     
