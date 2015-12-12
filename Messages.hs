@@ -17,7 +17,8 @@ newtype Author   = Author Text    deriving (Eq, Ord, Data, Typeable, SafeCopy)
 newtype Subject  = Subject Text   deriving (Eq, Ord, Data, Typeable, SafeCopy)
 newtype Contents = Contents Text  deriving (Eq, Ord, Data, Typeable, SafeCopy)
 
-
+-- message status; could be a Bool but we might need more states
+data Status = Present | Removed   deriving (Eq, Ord, Data, Typeable)
 
 data Message = Message { messageId :: PostId
                        , parent    :: Parent
@@ -29,6 +30,7 @@ data Message = Message { messageId :: PostId
                        , imageName :: Text
                        , imageExt  :: Text
                        , origFile  :: Text
+                       , status    :: Status
                        } deriving (Eq, Ord, Data, Typeable)
 
 

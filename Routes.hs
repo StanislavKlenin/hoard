@@ -91,6 +91,7 @@ route acid static url = do
                         , origFile  = pack $ origName upload
                         , imageName = pack $ imgName upload currTime
                         , imageExt  = pack $ imgExt upload
+                        , status    = Present
                         }
                     posted <- update' acid (AddPost message)
                     let tid = case thread of

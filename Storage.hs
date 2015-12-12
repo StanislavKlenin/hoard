@@ -22,6 +22,7 @@ import Data.Time.Clock      (UTCTime)
 import Messages
 
 -- Message defined elsewhere but deriveSafeCopy is here
+$(deriveSafeCopy 0 'base ''Status)
 $(deriveSafeCopy 0 'base ''Message)
 
 instance Indexable Message where
@@ -33,6 +34,7 @@ instance Indexable Message where
         , ixFun $ \bp -> [ contents bp ]
         , ixFun $ \bp -> [ created bp ]
         , ixFun $ \bp -> [ section bp ]
+        , ixFun $ \bp -> [ status bp ]
         ]
 
 -- Board: collection of messages with (semi)auto-incremented ids
@@ -64,6 +66,22 @@ addPost message = do
     return post
     -- TODO: forbid adding posts to nonexistent threads
 
+markDeleted :: PostId -> Update Board Bool
+markDeleted (PostId postId) = do
+    board <- get
+    let post = getOne $ (posts board) @= postId
+    upd board post
+    where
+        upd board (Just message) = do
+            let updated = message { status = Removed }
+                filtered = IxSet.delete message (posts board)
+            put Board { nextPostId = nextPostId board -- unchanged
+                      , posts      = IxSet.insert updated filtered
+                      }
+            return True
+        upd _ Nothing = do
+            return False
+
 postById :: PostId -> Query Board (Maybe Message)
 postById postId = do
     board <- ask
@@ -83,8 +101,9 @@ listThreads :: Section -> Query Board [Message]
 listThreads sec = do
     board <- ask
     let root = Parent 0 -- make it a module constant? how?
-    return $ toDescList (Proxy :: Proxy UTCTime) $ (posts board) @= sec @= root
-    -- TODO: order by last post time (not thread post time)
+    return $ toDescList (Proxy :: Proxy UTCTime) $ (posts board) @= sec
+                                                                 @= root
+                                                                 @= Present
 
 -- list of "thread previews",
 -- where each preview is the first post and several latest ones
@@ -93,13 +112,14 @@ listThreadPreviews sec count = do
     board <- ask
     let messages = posts board
         root = Parent 0
-        firstPosts = toList $ messages @= sec @= root
+        firstPosts = toList $ messages @= sec @= root @= Present
         threads =
             map (\msg ->
                        let PostId op = messageId msg
                            thr = Parent op
-                           thread = toDescList (Proxy :: Proxy UTCTime) $
-                                               (messages @= thr @= sec)
+                           thread = toDescList
+                                       (Proxy :: Proxy UTCTime) $
+                                       (messages @= thr @= sec @= Present)
                            latest = reverse $ take count thread
                        in msg : latest)
                 firstPosts
@@ -117,7 +137,7 @@ threadExists :: Parent -> Query Board Bool
 threadExists (Parent t) = do
     post  <- postById $ PostId t
     return $ case post of
-            Just Message {parent = Parent p} -> p == 0
+            Just Message {parent = Parent p, status = Present} -> p == 0
             Nothing -> False
 
 listThreadPosts :: Section -> Parent -> Query Board [Message]
@@ -126,8 +146,8 @@ listThreadPosts sec thr@(Parent p) = do
     let op = PostId p
     let messages = posts board
     let thread = toAscList (Proxy :: Proxy UTCTime) $
-            (messages @= sec &&& (messages @= thr |||
-                                  messages @= op))
+            (messages @= sec &&& messages @= Present &&& (messages @= thr |||
+                                                          messages @= op))
     return $ case thread of
             -- if the only item in a list has non-zero parent,
             -- then it is not a thread, so return an empty list
@@ -141,4 +161,5 @@ $(makeAcidic ''Board [ 'addPost
                      , 'listThreads
                      , 'listThreadPosts
                      , 'listThreadPreviews
+                     , 'markDeleted
                      ])
