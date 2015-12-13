@@ -34,9 +34,11 @@ hoard.conf is a `name = value` text config with following fields:
     default: `/tmp`
  * `static`: directory for static content (images, maybe stles and scripts);
     default: `/tmp`
+ * `prefix`: URL prefix (site home);
+    default: empty
 
 ## Issues / TODO
- * Home/root url
+ * ~~Home/root url prefix~~
  * ~~Image upload and resize (for previews)~~
  * ~~Removing posts~~
  * ~~CSS~~
