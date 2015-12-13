@@ -20,10 +20,10 @@ import Messages
 $(derivePathInfo ''Parent)
 $(derivePathInfo ''Section)
 
-data Sitemap = 
-    Home |
-    Board Text |
-    Thread Text Int
+data Sitemap = Home 
+             | Board Text
+             | Thread Text Int
+             | File Text Text Text
     deriving (Eq, Ord, Data, Typeable)
 
 $(derivePathInfo ''Sitemap)
@@ -34,4 +34,5 @@ sitemap =
     (  rHome
     <> rBoard . anyText
     <> rThread . (anyText </> int)
+    <> rFile . (anyText </> anyText </> anyText)
     )
