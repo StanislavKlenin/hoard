@@ -60,6 +60,10 @@ route acid static url = do
             --, do method POST
             --     ok $ toResponse "thread page POST\n"
             ]
+        (Sitemap.File b src name) ->
+            do
+                let file = joinPath $ map unpack [ static, b, src, name ]
+                serveFile (guessContentTypeM mimeTypes) file
     -- TODO: 404 if messages is empty (nonexistent threads and boards)
     
     where 
