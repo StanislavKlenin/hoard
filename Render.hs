@@ -70,16 +70,15 @@ renderMessage message =
                 smallName = if name /= empty
                             then mconcat [name, pack "s.jpeg"]
                             else empty
-                in if name == empty
-                    then [hamlet||]
-                    else [hamlet|
-                    
+                src = pack "src" -- hardcoded location for images
+            in if name == empty
+                then [hamlet||]
+                else [hamlet|
 <span>
-    <a href=/#{sec}/src/#{largeName}>#{largeName}</a>
+    <a href=@{File sec src largeName}>#{largeName}</a>
     <br>
-    <a href=/#{sec}/src/#{largeName}>
-        <img src=/#{sec}/src/#{smallName} class="preview">
-
+    <a href=@{File sec src largeName}>
+        <img src=@{File sec (pack "src") smallName} class="preview">
 |]
 renderMessages :: [Message] -> HtmlUrl Sitemap
 renderMessages messages =
