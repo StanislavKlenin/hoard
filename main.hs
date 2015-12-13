@@ -5,7 +5,7 @@ import Control.Monad        (msum)
 import Data.Acid            (AcidState, openLocalStateFrom)
 import Data.Acid.Local      (createCheckpointAndClose)
 import Data.Configurator    (Worth(..), load, lookupDefault)
-import Data.Text            (Text, empty, pack, unpack)
+import Data.Text            (Text, empty, pack)
 import Happstack.Server
 import System.Environment   (getArgs)
 import Text.Lucius          (renderCss)
@@ -22,7 +22,7 @@ routes acid decodePolicy homeUrl static = do
               setHeaderM "Content-Type" "text/css"
               ok $ toResponse $ renderCss stylesheet
          , implSite homeUrl empty (site acid static)
-         , do dirs "" $ serveDirectory DisableBrowsing [] (unpack static)
+         -- , do dirs "" $ serveDirectory DisableBrowsing [] (unpack static)
          , notFound $ toResponse (pack "not found\n")
          ]
 
