@@ -32,17 +32,19 @@ routes acid decodePolicy prefix homeUrl static = do
 
 main :: IO ()
 main = do
-    args   <- getArgs
-    config <- load [ Optional (head' args) ]
-    tmpdir <- lookupDefault "/tmp"        config (pack "tmp")
-    static <- lookupDefault "/tmp"        config (pack "static")
-    h      <- lookupDefault "localhost"   config (pack "host")
-    p      <- lookupDefault (8000 :: Int) config (pack "port")
-    state  <- lookupDefault "/tmp"        config (pack "storage")
-    prefix <- lookupDefault empty         config (pack "prefix")
+    args      <- getArgs
+    config    <- load [ Optional (head' args) ]
+    tmpdir    <- lookupDefault "/tmp"        config (pack "tmp")
+    static    <- lookupDefault "/tmp"        config (pack "static")
+    h         <- lookupDefault "localhost"   config (pack "host")
+    p         <- lookupDefault (8000 :: Int) config (pack "port")
+    state     <- lookupDefault "/tmp"        config (pack "storage")
+    prefix    <- lookupDefault empty         config (pack "prefix")
+    maxFile   <- lookupDefault (1024*1024)   config (pack "max_file")
+    maxFields <- lookupDefault (1024*1024)   config (pack "max_fields")
+    maxHdr    <- lookupDefault (10*1024)     config (pack "max_header")
     
-    -- TODO: other policy parameters must be configurable too
-    let policy = defaultBodyPolicy tmpdir 1000000 1000000 1000000
+    let policy = defaultBodyPolicy tmpdir maxFile maxFields maxHdr
         home   = pack $ appRoot h p
         conf   = nullConf { port = p }
         st     = pack static
