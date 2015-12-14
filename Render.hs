@@ -78,7 +78,7 @@ renderMessage message =
     <a href=@{File sec src largeName}>#{largeName}</a>
     <br>
     <a href=@{File sec src largeName}>
-        <img src=@{File sec (pack "src") smallName} class="preview">
+        <img src=@{File sec src smallName} class="preview">
 |]
 renderMessages :: [Message] -> HtmlUrl Sitemap
 renderMessages messages =
