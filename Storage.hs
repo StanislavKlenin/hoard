@@ -137,11 +137,13 @@ listThreadPreviews sec count = do
             in (created r) `compare` (created l)
 
 
-threadExists :: Parent -> Query Board Bool
-threadExists (Parent t) = do
+threadExists :: Section -> Parent -> Query Board Bool
+threadExists sec (Parent t) = do
     post  <- postById $ PostId t
     return $ case post of
-            Just Message {parent = Parent p, status = Present} -> p == 0
+            Just Message { parent = Parent p
+                         , section = b
+                         , status = Present } -> p == 0 && sec == b
             Nothing -> False
 
 listThreadPosts :: Section -> Parent -> Query Board [Message]
@@ -166,4 +168,5 @@ $(makeAcidic ''Board [ 'addPost
                      , 'listThreadPosts
                      , 'listThreadPreviews
                      , 'markDeleted
+                     , 'threadExists
                      ])
