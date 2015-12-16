@@ -50,16 +50,20 @@ route acid static url = do
             --, do method POST
             --     ok $ toResponse "board page POST\n"
             ]
-        (Sitemap.Thread b t) -> msum
-            [ do method GET
-                 messages <- query' acid (ListThreadPosts (Section b)
-                                                          (Parent t))
-                 --tz       <- liftIO $ getCurrentTimeZone
-                 ok $ toResponse $ renderThread b messages urlf
-            , post b t
-            --, do method POST
-            --     ok $ toResponse "thread page POST\n"
-            ]
+        (Sitemap.Thread b t) -> do
+            exists <- query' acid (ThreadExists (Section b) (Parent t))
+            if (not exists)
+                then notFound $ toResponse (pack "thread not found\n")
+                else msum
+                    [ do method GET
+                         messages <- query' acid (ListThreadPosts (Section b)
+                                                                  (Parent t))
+                         --tz       <- liftIO $ getCurrentTimeZone
+                         ok $ toResponse $ renderThread b messages urlf
+                    , post b t
+                    --, do method POST
+                    --     ok $ toResponse "thread page POST\n"
+                    ]
         (Sitemap.File b src name) ->
             do
                 let file = joinPath $ map unpack [ static, b, src, name ]
