@@ -32,7 +32,7 @@ hoard.conf is a `name = value` text config with following fields:
     default: `/tmp`
  * `tmp`: temporary directory for file uploads;
     default: `/tmp`
- * `static`: directory for static content (images, maybe stles and scripts);
+ * `static`: directory for static content (images, maybe styles and scripts);
     default: `/tmp`
  * `prefix`: URL prefix (site home);
     default: empty
@@ -48,6 +48,8 @@ hoard.conf is a `name = value` text config with following fields:
  * Use current timezone
  * ~~Typesafe URLs~~
  * REST API
+ * Markup parser
+ * Admin console
 
 ## Routes
 
