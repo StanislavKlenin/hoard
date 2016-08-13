@@ -3,6 +3,7 @@
     GeneralizedNewtypeDeriving,
     OverloadedStrings,
     TemplateHaskell,
+    FlexibleContexts,
     TypeFamilies #-}
 
 module Storage where
@@ -23,6 +24,12 @@ import Data.Text            (Text)
 import Messages
 
 -- Message defined elsewhere but deriveSafeCopy is here
+$(deriveSafeCopy 0 'base ''PostId)
+$(deriveSafeCopy 0 'base ''Parent)
+$(deriveSafeCopy 0 'base ''Section)
+$(deriveSafeCopy 0 'base ''Author)
+$(deriveSafeCopy 0 'base ''Subject)
+$(deriveSafeCopy 0 'base ''Contents)
 $(deriveSafeCopy 0 'base ''Status)
 $(deriveSafeCopy 0 'base ''Message)
 
