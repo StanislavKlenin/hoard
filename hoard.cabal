@@ -43,19 +43,19 @@ library
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   default-language:    Haskell2010
 
-executable hoard-exe
+executable hoard-run
   main-is:             Main.hs
   hs-source-dirs:      app
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   build-depends:       base
                      , text
-                     , hoard
                      , acid-state >=0.13.1
                      , shakespeare >=2.0.7
                      , configurator
                      , happstack-server
                      , web-routes >=0.27.9
                      , web-routes-happstack >=0.23.9
+                     , hoard
   default-language:    Haskell2010
 
 test-suite hoard-test
