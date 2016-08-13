@@ -1,5 +1,8 @@
 name:                hoard
-version:             0.6.2.1
+-- PVP summary:      +-+------- breaking API changes
+--                   | | +----- non-breaking API additions
+--                   | | | +--- code changes with no API change
+version:             0.6.3.0
 synopsis:            Imageboard in Haskell (Happstack/Hamlet)
 description:         Please see README.md
 homepage:            https://github.com/StanislavKlenin/hoard
