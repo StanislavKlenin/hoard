@@ -6,7 +6,14 @@ Haskell board, work in progress
 
 [libgd](http://libgd.github.io/) required.
 
-Cabal sandbox is recommended
+[Haskell stack](https://www.haskellstack.org/) is recommened.
+```
+stack setup
+stack build
+stack exec hoard-run
+```
+
+Alternatively, Cabal sandbox might still work
 ```
 cabal sandbox init
 cabal install --only-dependencies --max-backjumps 16384
@@ -16,6 +23,10 @@ cabal run
 
 Hoard loads configuration from an optional config file
 passed as the first (and only) command line argument
+```
+stack exec hoard-run sample.conf
+```
+or
 ```
 cabal run hoard.conf
 ```
