@@ -4,3 +4,4 @@ state/
 .cabal-sandbox/
 cabal.sandbox.config
 *.sock
+.stack-work/
