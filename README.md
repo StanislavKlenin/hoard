@@ -35,10 +35,10 @@ or
 /path/to/hoard hoard.conf
 ```
 hoard.conf is a `name = value` text config with following fields:
- * `host`: hostname (used to generate urls, mostly);
-    default: `localhost`
  * `port`: port to listen at;
     default: `8000`
+ * `domain`: hostname part of generated urls; should contain scheme, host and (optionally) port, such as `http://domain:8000`; note: port needs not be the same as listen port;
+    default: `http://localhost:8000`
  * `storage`: AcidState storage directory;
     default: `/tmp`
  * `tmp`: temporary directory for file uploads;

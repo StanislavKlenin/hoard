@@ -36,8 +36,8 @@ main = do
     config    <- load [ Optional (head' args) ]
     tmpdir    <- lookupDefault "/tmp"        config (pack "tmp")
     static    <- lookupDefault "/tmp"        config (pack "static")
-    h         <- lookupDefault "localhost"   config (pack "host")
     p         <- lookupDefault (8000 :: Int) config (pack "port")
+    domain    <- lookupDefault "http://localhost:8000" config (pack "domain")
     state     <- lookupDefault "/tmp"        config (pack "storage")
     prefix    <- lookupDefault empty         config (pack "prefix")
     maxFile   <- lookupDefault (1024*1024)   config (pack "max_file")
@@ -45,7 +45,7 @@ main = do
     maxHdr    <- lookupDefault (10*1024)     config (pack "max_header")
     
     let policy = defaultBodyPolicy tmpdir maxFile maxFields maxHdr
-        home   = pack $ appRoot h p
+        home   = pack domain
         conf   = nullConf { port = p }
         st     = pack static
     
@@ -57,9 +57,3 @@ main = do
         head' :: [String] -> String
         head' [] = ""
         head' (x:_) = x
-        
-        appRoot h p =
-            case p of
-                80  -> "http://"  ++ h
-                443 -> "https://" ++ h
-                _   -> "http://"  ++ h ++ ":" ++ (show p)
