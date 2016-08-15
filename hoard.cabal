@@ -2,7 +2,7 @@ name:                hoard
 -- PVP summary:      +-+------- breaking API changes
 --                   | | +----- non-breaking API additions
 --                   | | | +--- code changes with no API change
-version:             0.6.3.0
+version:             0.7.0.0
 synopsis:            Imageboard in Haskell (Happstack/Hamlet)
 description:         Please see README.md
 homepage:            https://github.com/StanislavKlenin/hoard
@@ -10,7 +10,7 @@ license:             BSD3
 license-file:        LICENSE
 author:              Stanislav Klenin
 maintainer:          stanislav.klenin@gmail.com
-copyright:           2016 Stanislav Klenin
+copyright:           2015-2016 Stanislav Klenin
 category:            Web
 build-type:          Simple
 -- extra-source-files:
