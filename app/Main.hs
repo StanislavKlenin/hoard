@@ -33,16 +33,16 @@ routes acid decodePolicy prefix homeUrl static = do
 main :: IO ()
 main = do
     args      <- getArgs
-    config    <- load [ Optional (head' args) ]
-    tmpdir    <- lookupDefault "/tmp"        config (pack "tmp")
-    static    <- lookupDefault "/tmp"        config (pack "static")
-    p         <- lookupDefault (8000 :: Int) config (pack "port")
-    domain    <- lookupDefault "http://localhost:8000" config (pack "domain")
-    state     <- lookupDefault "/tmp"        config (pack "storage")
-    prefix    <- lookupDefault empty         config (pack "prefix")
-    maxFile   <- lookupDefault (1024*1024)   config (pack "max_file")
-    maxFields <- lookupDefault (1024*1024)   config (pack "max_fields")
-    maxHdr    <- lookupDefault (10*1024)     config (pack "max_header")
+    conf      <- load [ Optional (head' args) ]
+    tmpdir    <- lookupDefault "/tmp"                  conf (pack "tmp")
+    static    <- lookupDefault "/tmp"                  conf (pack "static")
+    p         <- lookupDefault (8000 :: Int)           conf (pack "port")
+    domain    <- lookupDefault "http://localhost:8000" conf (pack "domain")
+    state     <- lookupDefault "/tmp"                  conf (pack "storage")
+    prefix    <- lookupDefault empty                   conf (pack "prefix")
+    maxFile   <- lookupDefault (1024*1024)             conf (pack "max_file")
+    maxFields <- lookupDefault (1024*1024)             conf (pack "max_fields")
+    maxHdr    <- lookupDefault (10*1024)               conf (pack "max_header")
     
     let policy = defaultBodyPolicy tmpdir maxFile maxFields maxHdr
         home   = pack domain
